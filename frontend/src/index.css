@@ -18,11 +18,11 @@
   }
 
   ::selection {
-    @apply bg-accent-600 text-white;
+    @apply bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900;
   }
 
   *:focus-visible {
-    @apply outline-none ring-2 ring-accent-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-950;
+    @apply outline-none ring-2 ring-slate-900 dark:ring-slate-100 ring-offset-2 ring-offset-white dark:ring-offset-slate-950;
   }
 
   input:focus-visible,
@@ -43,7 +43,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-accent-600 text-white border-accent-600 hover:bg-accent-700 hover:border-accent-700 active:bg-accent-800;
+    @apply btn bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:border-slate-800 active:bg-slate-950 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-100 dark:hover:bg-white dark:hover:border-white dark:active:bg-slate-200;
   }
 
   .btn-secondary {
@@ -55,7 +55,7 @@
   }
 
   .input {
-    @apply w-full h-9 px-3 text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-accent-600 dark:focus:border-accent-500 focus:ring-0 transition-colors duration-100 disabled:bg-slate-50 dark:disabled:bg-slate-900/50 disabled:text-slate-500;
+    @apply w-full h-9 px-3 text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-slate-900 dark:focus:border-slate-100 focus:ring-0 transition-colors duration-100 disabled:bg-slate-50 dark:disabled:bg-slate-900/50 disabled:text-slate-500;
   }
 
   .label {

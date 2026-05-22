@@ -32,7 +32,7 @@ export default function Login() {
     <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 flex items-center justify-center px-6">
       <div className="w-full max-w-[360px] fade-in">
         <div className="flex flex-col items-center mb-10">
-          <div className="w-9 h-9 bg-accent-600 text-white flex items-center justify-center text-sm font-bold tracking-tight mb-5">
+          <div className="w-9 h-9 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center text-sm font-bold tracking-tight mb-5">
             T
           </div>
           <h1 className="text-[22px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
@@ -90,7 +90,7 @@ export default function Login() {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setError(null);
               }}
-              className="text-accent-600 dark:text-accent-400 font-medium hover:underline underline-offset-2"
+              className="text-slate-900 dark:text-slate-100 font-medium hover:underline underline-offset-2"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>

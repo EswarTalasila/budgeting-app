@@ -66,7 +66,7 @@ function UserMenu() {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-2.5 px-2 h-10 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors duration-100"
       >
-        <div className="w-7 h-7 bg-accent-600 text-white flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
+        <div className="w-7 h-7 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
           {initial}
         </div>
         <span className="flex-1 text-left text-[12px] font-medium text-slate-700 dark:text-slate-200 truncate">
@@ -106,7 +106,7 @@ export default function Layout({ children }) {
       <aside className="w-[220px] bg-slate-50/60 dark:bg-slate-900/40 border-r border-slate-200 dark:border-slate-800 flex flex-col">
         <div className="h-14 px-5 flex items-center border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-[22px] h-[22px] bg-accent-600 text-white flex items-center justify-center text-[11px] font-bold tracking-tight">
+            <div className="w-[22px] h-[22px] bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center text-[11px] font-bold tracking-tight">
               T
             </div>
             <span className="text-[13px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
@@ -124,7 +124,7 @@ export default function Layout({ children }) {
               className={({ isActive }) =>
                 `flex items-center gap-2.5 px-2.5 h-8 text-[13px] font-medium transition-colors duration-100 ${
                   isActive
-                    ? 'bg-white dark:bg-slate-900 text-accent-700 dark:text-accent-300 border border-slate-200 dark:border-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:shadow-none'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:shadow-none'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 border border-transparent'
                 }`
               }

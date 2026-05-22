@@ -83,14 +83,14 @@ function BudgetRow({ item, month, onSaved }) {
                   required
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
-                  className="h-7 pl-5 pr-2 w-24 text-[12px] bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-accent-600 dark:focus:border-accent-500 focus:ring-0 text-slate-900 dark:text-slate-100"
+                  className="h-7 pl-5 pr-2 w-24 text-[12px] bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-slate-900 dark:focus:border-slate-100 focus:ring-0 text-slate-900 dark:text-slate-100"
                   placeholder="0.00"
                 />
               </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="h-7 px-2 text-[12px] font-medium bg-accent-600 text-white border border-accent-600 hover:bg-accent-700"
+                className="h-7 px-2 text-[12px] font-medium bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border border-slate-900 dark:border-slate-100 hover:bg-slate-800 dark:hover:bg-white"
               >
                 {saving ? '…' : 'Save'}
               </button>
@@ -105,7 +105,7 @@ function BudgetRow({ item, month, onSaved }) {
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="text-[12px] text-slate-500 dark:text-slate-400 hover:text-accent-600 dark:hover:text-accent-400 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+              className="text-[12px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
             >
               + Set budget
             </button>
@@ -121,7 +121,7 @@ function BudgetRow({ item, month, onSaved }) {
               ? 'bg-red-500'
               : pct > 80
               ? 'bg-amber-500'
-              : 'bg-accent-600'
+              : 'bg-slate-900 dark:bg-slate-100'
           }`}
           style={{ width: limit !== null ? `${pct}%` : '100%', opacity: limit === null ? 0.5 : 1 }}
         />
@@ -182,7 +182,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             {syncing && (
               <span className="text-[12px] text-slate-500 dark:text-slate-400 inline-flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 bg-accent-500 animate-pulse" />
+                <span className="inline-block w-1.5 h-1.5 bg-slate-500 dark:bg-slate-400 animate-pulse" />
                 Syncing…
               </span>
             )}

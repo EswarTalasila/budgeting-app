@@ -14,7 +14,7 @@ const CATEGORY_DOT = {
   'Food & Dining': 'bg-orange-500',
   Shopping: 'bg-pink-500',
   Transportation: 'bg-blue-500',
-  Entertainment: 'bg-accent-500',
+  Entertainment: 'bg-purple-500',
   'Bills & Utilities': 'bg-slate-500',
   Health: 'bg-emerald-500',
   Travel: 'bg-sky-500',
