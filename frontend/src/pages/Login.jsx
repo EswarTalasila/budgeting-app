@@ -29,54 +29,103 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
-        <h1 className="text-xl font-semibold text-gray-900 mb-6">
-          {mode === 'login' ? 'Sign in' : 'Create account'}
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+    <div className="min-h-screen flex">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 text-white p-12 flex-col justify-between relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-emerald-400 rounded-full filter blur-3xl" />
+          <div className="absolute bottom-20 right-20 w-72 h-72 bg-indigo-500 rounded-full filter blur-3xl" />
+        </div>
+        <div className="relative">
+          <div className="flex items-center gap-2 text-xl font-bold">
+            <div className="w-8 h-8 rounded-lg bg-white text-slate-900 flex items-center justify-center font-extrabold">
+              B
+            </div>
+            <span>Budget</span>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+        </div>
+        <div className="relative space-y-4">
+          <h1 className="text-4xl font-bold leading-tight">
+            Take control of your finances.
+          </h1>
+          <p className="text-lg text-slate-300 max-w-md">
+            Track every dollar, set smart budgets, and let AI categorize your transactions automatically.
+          </p>
+        </div>
+        <div className="relative text-sm text-slate-400">
+          A personal budgeting MVP.
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-slate-50">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden flex items-center gap-2 text-xl font-bold mb-8">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-extrabold">
+              B
+            </div>
+            <span>Budget</span>
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900">
+              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {mode === 'login'
+                ? 'Sign in to your account to continue.'
+                : 'Get started by creating an account.'}
+            </p>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white rounded-md py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input"
+                placeholder="••••••••"
+              />
+            </div>
 
-        <p className="mt-4 text-sm text-gray-500 text-center">
-          {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button
-            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-            className="text-indigo-600 hover:underline"
-          >
-            {mode === 'login' ? 'Sign up' : 'Sign in'}
-          </button>
-        </p>
+            {error && (
+              <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                {error}
+              </div>
+            )}
+
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-sm text-slate-500 text-center">
+            {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === 'login' ? 'register' : 'login');
+                setError(null);
+              }}
+              className="text-slate-900 font-medium hover:underline"
+            >
+              {mode === 'login' ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

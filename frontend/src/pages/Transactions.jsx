@@ -6,22 +6,26 @@ function currentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
 
+function fmt(n) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.abs(Number(n)));
+}
+
 const CATEGORY_COLORS = {
-  'Food & Dining': 'bg-orange-100 text-orange-700',
-  Shopping: 'bg-pink-100 text-pink-700',
-  Transportation: 'bg-blue-100 text-blue-700',
-  Entertainment: 'bg-purple-100 text-purple-700',
-  'Bills & Utilities': 'bg-gray-100 text-gray-700',
-  Health: 'bg-green-100 text-green-700',
-  Travel: 'bg-sky-100 text-sky-700',
-  Income: 'bg-emerald-100 text-emerald-700',
-  Other: 'bg-yellow-100 text-yellow-700',
+  'Food & Dining': 'bg-orange-50 text-orange-700 border-orange-200',
+  Shopping: 'bg-pink-50 text-pink-700 border-pink-200',
+  Transportation: 'bg-blue-50 text-blue-700 border-blue-200',
+  Entertainment: 'bg-purple-50 text-purple-700 border-purple-200',
+  'Bills & Utilities': 'bg-slate-100 text-slate-700 border-slate-200',
+  Health: 'bg-green-50 text-green-700 border-green-200',
+  Travel: 'bg-sky-50 text-sky-700 border-sky-200',
+  Income: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Other: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
 function CategoryBadge({ category }) {
-  const color = CATEGORY_COLORS[category] || 'bg-gray-100 text-gray-600';
+  const color = CATEGORY_COLORS[category] || 'bg-slate-50 text-slate-600 border-slate-200';
   return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${color}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${color}`}>
       {category || 'Uncategorized'}
     </span>
   );
@@ -32,7 +36,11 @@ export default function Transactions() {
   const { transactions, loading, error, refetch } = useTransactions(month);
 
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ description: '', amount: '', date: new Date().toISOString().slice(0, 10) });
+  const [form, setForm] = useState({
+    description: '',
+    amount: '',
+    date: new Date().toISOString().slice(0, 10),
+  });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -59,107 +67,131 @@ export default function Transactions() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Transactions</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Transactions</h1>
+          <p className="text-sm text-slate-500 mt-1">All your income and expenses.</p>
+        </div>
         <div className="flex items-center gap-3">
           <input
             type="month"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="input w-auto"
           />
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="bg-indigo-600 text-white rounded-md px-4 py-1.5 text-sm font-medium hover:bg-indigo-700 transition-colors"
-          >
-            {showForm ? 'Cancel' : 'Add'}
+          <button onClick={() => setShowForm((v) => !v)} className="btn-primary">
+            {showForm ? 'Cancel' : '+ Add'}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form
-          onSubmit={handleAdd}
-          className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-5 flex flex-wrap gap-3 items-end"
-        >
-          <div className="flex-1 min-w-40">
-            <label className="block text-xs text-gray-500 mb-1">Description</label>
-            <input
-              required
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+        <form onSubmit={handleAdd} className="card p-5 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Description</label>
+              <input
+                required
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                className="input"
+                placeholder="Coffee at Starbucks"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Amount</label>
+              <input
+                required
+                type="number"
+                step="0.01"
+                value={form.amount}
+                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                className="input"
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Date</label>
+              <input
+                required
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                className="input"
+              />
+            </div>
           </div>
-          <div className="w-32">
-            <label className="block text-xs text-gray-500 mb-1">Amount ($)</label>
-            <input
-              required
-              type="number"
-              step="0.01"
-              value={form.amount}
-              onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="w-40">
-            <label className="block text-xs text-gray-500 mb-1">Date</label>
-            <input
-              required
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="flex items-end gap-2">
-            {formError && <p className="text-sm text-red-500">{formError}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="bg-indigo-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {submitting ? 'Saving...' : 'Save'}
+          {formError && (
+            <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 mt-4">
+              {formError}
+            </div>
+          )}
+          <div className="mt-4 flex justify-end gap-2">
+            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" disabled={submitting} className="btn-primary">
+              {submitting ? 'Saving...' : 'Save transaction'}
             </button>
           </div>
+          <p className="text-xs text-slate-400 mt-3">
+            Category will be assigned automatically by AI.
+          </p>
         </form>
       )}
 
-      {loading && <p className="text-sm text-gray-500">Loading...</p>}
-      {error && <p className="text-sm text-red-500">Error: {error}</p>}
+      {loading && <p className="text-sm text-slate-500">Loading...</p>}
+      {error && (
+        <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
 
       {!loading && !error && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="card overflow-hidden">
           {transactions.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-12">No transactions for this month.</p>
+            <div className="p-12 text-center">
+              <p className="text-slate-500">No transactions for this month.</p>
+              <p className="text-sm text-slate-400 mt-1">Add one above to get started.</p>
+            </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Date</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Description</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Category</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Amount</th>
-                  <th className="px-5 py-3" />
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100">
                 {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 text-gray-500 whitespace-nowrap">
-                      {new Date(t.date + 'T00:00:00').toLocaleDateString()}
+                  <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
+                    <td className="px-6 py-3.5 text-slate-500 whitespace-nowrap">
+                      {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </td>
-                    <td className="px-5 py-3 text-gray-800 max-w-xs truncate">{t.description}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-6 py-3.5 text-slate-900 font-medium max-w-xs truncate">
+                      {t.description}
+                    </td>
+                    <td className="px-6 py-3.5">
                       <CategoryBadge category={t.category} />
                     </td>
-                    <td className={`px-5 py-3 text-right font-medium tabular-nums ${t.amount < 0 ? 'text-emerald-600' : 'text-gray-900'}`}>
-                      {t.amount < 0 ? '+' : ''}${Math.abs(t.amount).toFixed(2)}
+                    <td
+                      className={`px-6 py-3.5 text-right font-semibold tabular-nums ${
+                        t.amount < 0 ? 'text-emerald-600' : 'text-slate-900'
+                      }`}
+                    >
+                      {t.amount < 0 ? '+' : '-'}
+                      {fmt(t.amount)}
                     </td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-6 py-3.5 text-right">
                       <button
                         onClick={() => handleDelete(t.id)}
-                        className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                        className="text-xs text-slate-400 opacity-0 group-hover:opacity-100 hover:text-rose-600 transition-all"
                       >
                         Delete
                       </button>
