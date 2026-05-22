@@ -10,23 +10,26 @@ function fmt(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.abs(Number(n)));
 }
 
-const CATEGORY_COLORS = {
-  'Food & Dining': 'bg-orange-50 text-orange-700 border-orange-200',
-  Shopping: 'bg-pink-50 text-pink-700 border-pink-200',
-  Transportation: 'bg-blue-50 text-blue-700 border-blue-200',
-  Entertainment: 'bg-purple-50 text-purple-700 border-purple-200',
-  'Bills & Utilities': 'bg-slate-100 text-slate-700 border-slate-200',
-  Health: 'bg-green-50 text-green-700 border-green-200',
-  Travel: 'bg-sky-50 text-sky-700 border-sky-200',
-  Income: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Other: 'bg-amber-50 text-amber-700 border-amber-200',
+const CATEGORY_DOT = {
+  'Food & Dining': 'bg-orange-500',
+  Shopping: 'bg-pink-500',
+  Transportation: 'bg-blue-500',
+  Entertainment: 'bg-violet-500',
+  'Bills & Utilities': 'bg-slate-500',
+  Health: 'bg-emerald-500',
+  Travel: 'bg-sky-500',
+  Income: 'bg-green-600',
+  Other: 'bg-amber-500',
 };
 
-function CategoryBadge({ category }) {
-  const color = CATEGORY_COLORS[category] || 'bg-slate-50 text-slate-600 border-slate-200';
+function CategoryTag({ category }) {
+  if (!category) {
+    return <span className="text-[12px] text-slate-400">—</span>;
+  }
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${color}`}>
-      {category || 'Uncategorized'}
+    <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-700">
+      <span className={`w-1.5 h-1.5 ${CATEGORY_DOT[category] || 'bg-slate-400'}`} />
+      {category}
     </span>
   );
 }
@@ -67,12 +70,16 @@ export default function Transactions() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 pb-6 border-b border-slate-200 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Transactions</h1>
-          <p className="text-sm text-slate-500 mt-1">All your income and expenses.</p>
+          <p className="text-[12px] font-medium text-slate-500 uppercase tracking-[0.08em]">
+            Activity
+          </p>
+          <h1 className="mt-1.5 text-[28px] font-semibold text-slate-900 tracking-tight">
+            Transactions
+          </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <input
             type="month"
             value={month}
@@ -80,16 +87,16 @@ export default function Transactions() {
             className="input w-auto"
           />
           <button onClick={() => setShowForm((v) => !v)} className="btn-primary">
-            {showForm ? 'Cancel' : '+ Add'}
+            {showForm ? 'Cancel' : 'New transaction'}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleAdd} className="card p-5 mb-6">
+        <form onSubmit={handleAdd} className="panel p-5 mb-6 fade-in">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Description</label>
+              <label className="label">Description</label>
               <input
                 required
                 value={form.description}
@@ -99,19 +106,22 @@ export default function Transactions() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Amount</label>
-              <input
-                required
-                type="number"
-                step="0.01"
-                value={form.amount}
-                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-                className="input"
-                placeholder="0.00"
-              />
+              <label className="label">Amount</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">$</span>
+                <input
+                  required
+                  type="number"
+                  step="0.01"
+                  value={form.amount}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                  className="input pl-6"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Date</label>
+              <label className="label">Date</label>
               <input
                 required
                 type="date"
@@ -122,76 +132,80 @@ export default function Transactions() {
             </div>
           </div>
           {formError && (
-            <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 mt-4">
+            <div className="text-[13px] text-red-700 bg-red-50 border border-red-200 px-3 py-2 mt-4">
               {formError}
             </div>
           )}
-          <div className="mt-4 flex justify-end gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" disabled={submitting} className="btn-primary">
-              {submitting ? 'Saving...' : 'Save transaction'}
-            </button>
+          <div className="mt-5 flex items-center justify-between">
+            <p className="text-[12px] text-slate-500">
+              Category is auto-assigned by AI based on the description.
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" disabled={submitting} className="btn-primary">
+                {submitting ? 'Saving…' : 'Save'}
+              </button>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-3">
-            Category will be assigned automatically by AI.
-          </p>
         </form>
       )}
 
-      {loading && <p className="text-sm text-slate-500">Loading...</p>}
+      {loading && <p className="text-[13px] text-slate-500">Loading…</p>}
       {error && (
-        <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+        <div className="text-[13px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
           {error}
         </div>
       )}
 
       {!loading && !error && (
-        <div className="card overflow-hidden">
+        <div className="panel">
           {transactions.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="text-slate-500">No transactions for this month.</p>
-              <p className="text-sm text-slate-400 mt-1">Add one above to get started.</p>
+            <div className="p-16 text-center">
+              <p className="text-[13px] text-slate-600">No transactions for this month.</p>
+              <p className="text-[12px] text-slate-400 mt-1">
+                Click "New transaction" to add one manually.
+              </p>
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="table-base">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
-                  <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3" />
+                <tr>
+                  <th className="w-[90px]">Date</th>
+                  <th>Description</th>
+                  <th className="w-[180px]">Category</th>
+                  <th className="text-right w-[120px]">Amount</th>
+                  <th className="w-[60px]" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-3.5 text-slate-500 whitespace-nowrap">
+                  <tr key={t.id} className="group hover:bg-slate-50/60 transition-colors duration-100">
+                    <td className="text-slate-500 text-[12px] whitespace-nowrap tabular-nums">
                       {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                       })}
                     </td>
-                    <td className="px-6 py-3.5 text-slate-900 font-medium max-w-xs truncate">
+                    <td className="text-slate-900 font-medium truncate max-w-[320px]">
                       {t.description}
                     </td>
-                    <td className="px-6 py-3.5">
-                      <CategoryBadge category={t.category} />
+                    <td>
+                      <CategoryTag category={t.category} />
                     </td>
                     <td
-                      className={`px-6 py-3.5 text-right font-semibold tabular-nums ${
-                        t.amount < 0 ? 'text-emerald-600' : 'text-slate-900'
+                      className={`text-right font-semibold tabular-nums ${
+                        t.amount < 0 ? 'text-emerald-700' : 'text-slate-900'
                       }`}
                     >
-                      {t.amount < 0 ? '+' : '-'}
+                      {t.amount < 0 ? '+' : '−'}
                       {fmt(t.amount)}
                     </td>
-                    <td className="px-6 py-3.5 text-right">
+                    <td className="text-right">
                       <button
                         onClick={() => handleDelete(t.id)}
-                        className="text-xs text-slate-400 opacity-0 group-hover:opacity-100 hover:text-rose-600 transition-all"
+                        className="text-[12px] text-slate-400 opacity-0 group-hover:opacity-100 hover:text-red-600 transition-all duration-100"
                       >
                         Delete
                       </button>

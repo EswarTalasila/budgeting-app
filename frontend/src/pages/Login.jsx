@@ -29,90 +29,60 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 text-white p-12 flex-col justify-between relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-emerald-400 rounded-full filter blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-72 h-72 bg-indigo-500 rounded-full filter blur-3xl" />
-        </div>
-        <div className="relative">
-          <div className="flex items-center gap-2 text-xl font-bold">
-            <div className="w-8 h-8 rounded-lg bg-white text-slate-900 flex items-center justify-center font-extrabold">
-              B
-            </div>
-            <span>Budget</span>
+    <div className="min-h-screen bg-slate-50/60 flex items-center justify-center px-6">
+      <div className="w-full max-w-[360px] fade-in">
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center text-sm font-bold tracking-tight mb-5">
+            B
           </div>
-        </div>
-        <div className="relative space-y-4">
-          <h1 className="text-4xl font-bold leading-tight">
-            Take control of your finances.
+          <h1 className="text-[22px] font-semibold text-slate-900 tracking-tight">
+            {mode === 'login' ? 'Sign in to Budget' : 'Create your account'}
           </h1>
-          <p className="text-lg text-slate-300 max-w-md">
-            Track every dollar, set smart budgets, and let AI categorize your transactions automatically.
+          <p className="text-[13px] text-slate-500 mt-1.5">
+            {mode === 'login' ? 'Enter your email to continue.' : 'Start tracking your finances.'}
           </p>
         </div>
-        <div className="relative text-sm text-slate-400">
-          A personal budgeting MVP.
-        </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-slate-50">
-        <div className="w-full max-w-sm">
-          <div className="lg:hidden flex items-center gap-2 text-xl font-bold mb-8">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-extrabold">
-              B
-            </div>
-            <span>Budget</span>
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div>
+            <label className="label">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input"
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input"
+              placeholder="••••••••"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">
-              {mode === 'login' ? 'Welcome back' : 'Create your account'}
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {mode === 'login'
-                ? 'Sign in to your account to continue.'
-                : 'Get started by creating an account.'}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input"
-                placeholder="you@example.com"
-              />
+          {error && (
+            <div className="text-[13px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+              {error}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Password</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input"
-                placeholder="••••••••"
-              />
-            </div>
+          )}
 
-            {error && (
-              <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
-                {error}
-              </div>
-            )}
+          <button type="submit" disabled={loading} className="btn-primary w-full">
+            {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : 'Create account'}
+          </button>
+        </form>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : 'Create account'}
-            </button>
-          </form>
-
-          <p className="mt-6 text-sm text-slate-500 text-center">
+        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
+          <p className="text-[13px] text-slate-500">
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               type="button"
@@ -120,7 +90,7 @@ export default function Login() {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setError(null);
               }}
-              className="text-slate-900 font-medium hover:underline"
+              className="text-slate-900 font-medium hover:underline underline-offset-2"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>

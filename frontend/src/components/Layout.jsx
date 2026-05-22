@@ -1,21 +1,24 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-function Icon({ name, className = 'w-5 h-5' }) {
+function Icon({ name, className = 'w-[15px] h-[15px]' }) {
   const icons = {
-    dashboard: (
-      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    ),
-    transactions: (
-      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    ),
-    budgets: (
-      <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    ),
+    dashboard: <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />,
+    transactions: <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />,
+    budgets: <path d="M3 3v18h18M7 14l4-4 4 4 5-5" />,
     logout: <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />,
   };
+  const filled = name === 'dashboard';
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg
+      className={className}
+      fill={filled ? 'currentColor' : 'none'}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={filled ? 0 : 1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {icons[name]}
     </svg>
   );
@@ -37,39 +40,41 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      <aside className="w-60 bg-white border-r border-slate-200 flex flex-col">
-        <div className="px-6 py-6 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-extrabold">
-            B
+    <div className="flex h-screen bg-white">
+      <aside className="w-[220px] bg-slate-50/60 border-r border-slate-200 flex flex-col">
+        <div className="h-14 px-5 flex items-center border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <div className="w-[22px] h-[22px] bg-slate-900 text-white flex items-center justify-center text-[11px] font-bold tracking-tight">
+              B
+            </div>
+            <span className="text-[13px] font-semibold text-slate-900 tracking-tight">Budget</span>
           </div>
-          <span className="text-lg font-bold text-slate-900">Budget</span>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1">
+        <nav className="flex-1 px-2 py-3 space-y-0.5">
           {navItems.map(({ to, label, icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                `flex items-center gap-2.5 px-2.5 h-8 text-[13px] font-medium transition-colors duration-100 ${
                   isActive
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-white text-slate-900 border border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04)]'
+                    : 'text-slate-600 hover:text-slate-900 border border-transparent'
                 }`
               }
             >
               <Icon name={icon} />
-              {label}
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-slate-200">
+        <div className="px-2 py-3 border-t border-slate-200">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all"
+            className="w-full flex items-center gap-2.5 px-2.5 h-8 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors duration-100"
           >
             <Icon name="logout" />
             Sign out
@@ -78,7 +83,7 @@ export default function Layout({ children }) {
       </aside>
 
       <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto px-8 py-10">{children}</div>
+        <div className="max-w-[1100px] mx-auto px-10 py-10 fade-in">{children}</div>
       </main>
     </div>
   );

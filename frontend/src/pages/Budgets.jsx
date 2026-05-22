@@ -59,12 +59,18 @@ export default function Budgets() {
     }
   }
 
+  const total = budgets.reduce((acc, b) => acc + Number(b.monthly_limit), 0);
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 pb-6 border-b border-slate-200 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Budgets</h1>
-          <p className="text-sm text-slate-500 mt-1">Set monthly spending limits per category.</p>
+          <p className="text-[12px] font-medium text-slate-500 uppercase tracking-[0.08em]">
+            Planning
+          </p>
+          <h1 className="mt-1.5 text-[28px] font-semibold text-slate-900 tracking-tight">
+            Budgets
+          </h1>
         </div>
         <input
           type="month"
@@ -76,14 +82,16 @@ export default function Budgets() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
-          <div className="card p-6">
-            <h2 className="text-base font-semibold text-slate-900 mb-1">Set a budget</h2>
-            <p className="text-xs text-slate-500 mb-4">
-              Existing categories will be updated.
+          <div className="panel p-5">
+            <h2 className="text-[14px] font-semibold text-slate-900 tracking-tight">
+              Set a budget
+            </h2>
+            <p className="text-[12px] text-slate-500 mt-0.5 mb-5">
+              Save again to update an existing category.
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+                <label className="label">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -95,9 +103,9 @@ export default function Budgets() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Monthly limit</label>
+                <label className="label">Monthly limit</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">$</span>
                   <input
                     type="number"
                     min="0"
@@ -105,50 +113,55 @@ export default function Budgets() {
                     required
                     value={limit}
                     onChange={(e) => setLimit(e.target.value)}
-                    className="input pl-7"
+                    className="input pl-6"
                     placeholder="0.00"
                   />
                 </div>
               </div>
               {error && (
-                <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                <div className="text-[13px] text-red-700 bg-red-50 border border-red-200 px-3 py-2">
                   {error}
                 </div>
               )}
               <button type="submit" disabled={saving} className="btn-primary w-full">
-                {saving ? 'Saving...' : 'Save budget'}
+                {saving ? 'Saving…' : 'Save budget'}
               </button>
             </form>
           </div>
         </div>
 
         <div className="lg:col-span-3">
-          <div className="card overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="text-base font-semibold text-slate-900">Current budgets</h2>
+          <div className="panel">
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+              <h2 className="text-[14px] font-semibold text-slate-900 tracking-tight">
+                Current budgets
+              </h2>
+              {budgets.length > 0 && (
+                <span className="text-[12px] text-slate-500 tabular-nums">
+                  Total {fmt(total)}
+                </span>
+              )}
             </div>
             {budgets.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-slate-500">No budgets set yet.</p>
-                <p className="text-sm text-slate-400 mt-1">Add one to get started.</p>
+              <div className="p-16 text-center">
+                <p className="text-[13px] text-slate-600">No budgets set yet.</p>
+                <p className="text-[12px] text-slate-400 mt-1">
+                  Add one to start tracking your spending.
+                </p>
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <table className="table-base">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/50">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Monthly limit
-                    </th>
+                  <tr>
+                    <th>Category</th>
+                    <th className="text-right">Monthly limit</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {budgets.map((b) => (
-                    <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-3.5 text-slate-900 font-medium">{b.category}</td>
-                      <td className="px-6 py-3.5 text-right text-slate-900 font-semibold tabular-nums">
+                    <tr key={b.id} className="hover:bg-slate-50/60 transition-colors duration-100">
+                      <td className="text-slate-900 font-medium">{b.category}</td>
+                      <td className="text-right text-slate-900 font-semibold tabular-nums">
                         {fmt(b.monthly_limit)}
                       </td>
                     </tr>
