@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { createTransaction, deleteTransaction, recategorizeOther } from '../lib/api';
 
@@ -21,6 +21,26 @@ const CATEGORY_DOT = {
   Income: 'bg-green-600',
   Other: 'bg-amber-500',
 };
+
+function SortHeader({ label, sortKey, current, dir, onClick, className = '', align = 'left' }) {
+  const active = current === sortKey;
+  return (
+    <th className={className}>
+      <button
+        type="button"
+        onClick={() => onClick(sortKey)}
+        className={`inline-flex items-center gap-1 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-100 ${
+          active ? 'text-zinc-900 dark:text-zinc-100' : ''
+        } ${align === 'right' ? 'flex-row-reverse' : ''}`}
+      >
+        {label}
+        <span className={`text-[9px] leading-none ${active ? 'opacity-100' : 'opacity-30'}`}>
+          {active ? (dir === 'asc' ? '▲' : '▼') : '▾'}
+        </span>
+      </button>
+    </th>
+  );
+}
 
 function CategoryTag({ category }) {
   if (!category) return <span className="text-[12px] text-zinc-400 dark:text-zinc-500">—</span>;
@@ -46,6 +66,41 @@ export default function Transactions() {
   const [formError, setFormError] = useState(null);
   const [recategorizing, setRecategorizing] = useState(false);
   const [recategorizeMsg, setRecategorizeMsg] = useState(null);
+  const [sortKey, setSortKey] = useState('date');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const sorted = useMemo(() => {
+    const copy = [...transactions];
+    copy.sort((a, b) => {
+      let av, bv;
+      if (sortKey === 'date') {
+        av = a.date;
+        bv = b.date;
+      } else if (sortKey === 'amount') {
+        av = Number(a.amount);
+        bv = Number(b.amount);
+      } else if (sortKey === 'description') {
+        av = (a.description || '').toLowerCase();
+        bv = (b.description || '').toLowerCase();
+      } else if (sortKey === 'category') {
+        av = (a.category || '').toLowerCase();
+        bv = (b.category || '').toLowerCase();
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  }, [transactions, sortKey, sortDir]);
+
+  function toggleSort(key) {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'date' || key === 'amount' ? 'desc' : 'asc');
+    }
+  }
 
   async function handleRecategorize() {
     setRecategorizing(true);
@@ -204,15 +259,15 @@ export default function Transactions() {
             <table className="table-base">
               <thead>
                 <tr>
-                  <th className="w-[90px]">Date</th>
-                  <th>Description</th>
-                  <th className="w-[180px]">Category</th>
-                  <th className="text-right w-[120px]">Amount</th>
+                  <SortHeader label="Date" sortKey="date" current={sortKey} dir={sortDir} onClick={toggleSort} className="w-[90px]" />
+                  <SortHeader label="Description" sortKey="description" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                  <SortHeader label="Category" sortKey="category" current={sortKey} dir={sortDir} onClick={toggleSort} className="w-[180px]" />
+                  <SortHeader label="Amount" sortKey="amount" current={sortKey} dir={sortDir} onClick={toggleSort} className="text-right w-[120px]" align="right" />
                   <th className="w-[60px]" />
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((t) => (
+                {sorted.map((t) => (
                   <tr key={t.id} className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
                     <td className="text-zinc-500 dark:text-zinc-400 text-[12px] whitespace-nowrap tabular-nums">
                       {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
