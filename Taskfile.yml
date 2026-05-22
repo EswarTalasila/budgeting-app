@@ -1,0 +1,50 @@
+version: "3"
+
+tasks:
+  install:
+    desc: Install all dependencies
+    cmds:
+      - uv pip install -r backend/requirements.txt
+      - cd frontend && npm install
+
+  db:
+    desc: Start Postgres via Docker
+    cmds:
+      - docker compose up -d
+
+  db:stop:
+    desc: Stop Postgres
+    cmds:
+      - docker compose down
+
+  migrate:
+    desc: Run pending migrations
+    dir: backend
+    cmds:
+      - ../.venv/bin/alembic upgrade head
+
+  migrate:new:
+    desc: Create a new migration (task migrate:new -- "description")
+    dir: backend
+    cmds:
+      - ../.venv/bin/alembic revision --autogenerate -m "{{.CLI_ARGS}}"
+
+  backend:
+    desc: Start the FastAPI server
+    dir: backend
+    cmds:
+      - ../.venv/bin/python run.py
+
+  frontend:
+    desc: Start the React dev server
+    dir: frontend
+    cmds:
+      - npm run dev
+
+  dev:
+    desc: Start DB, backend, and frontend
+    deps: [db]
+    cmds:
+      - task: backend
+        async: true
+      - task: frontend
