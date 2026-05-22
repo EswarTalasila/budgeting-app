@@ -58,7 +58,7 @@ async def budget_summary(
     budgets_result = await db.execute(
         select(Budget).where(Budget.user_id == user_id, Budget.month == month)
     )
-    budgets = budgets_result.scalars().all()
+    budgets_by_category = {b.category: b for b in budgets_result.scalars().all()}
 
     spent_result = await db.execute(
         select(Transaction.category, func.sum(Transaction.amount))
@@ -67,17 +67,29 @@ async def budget_summary(
             Transaction.date >= month_start,
             Transaction.date < month_end,
             Transaction.amount > 0,
+            Transaction.category.isnot(None),
         )
         .group_by(Transaction.category)
     )
     spent_by_category = {row[0]: row[1] for row in spent_result.all()}
 
-    return [
-        BudgetSummaryItem(
-            category=b.category,
-            monthly_limit=b.monthly_limit,
-            spent=spent_by_category.get(b.category, Decimal("0")),
-            remaining=b.monthly_limit - spent_by_category.get(b.category, Decimal("0")),
+    categories = set(budgets_by_category.keys()) | set(spent_by_category.keys())
+    categories.discard("Income")
+
+    items = []
+    for category in categories:
+        budget = budgets_by_category.get(category)
+        spent = spent_by_category.get(category, Decimal("0"))
+        limit = budget.monthly_limit if budget else None
+        remaining = (limit - spent) if limit is not None else None
+        items.append(
+            BudgetSummaryItem(
+                category=category,
+                monthly_limit=limit,
+                spent=spent,
+                remaining=remaining,
+            )
         )
-        for b in budgets
-    ]
+
+    items.sort(key=lambda x: (x.monthly_limit is None, -float(x.spent)))
+    return items

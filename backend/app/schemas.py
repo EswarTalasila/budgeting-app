@@ -66,9 +66,9 @@ class BudgetOut(BaseModel):
 
 class BudgetSummaryItem(BaseModel):
     category: str
-    monthly_limit: Decimal
+    monthly_limit: Decimal | None
     spent: Decimal
-    remaining: Decimal
+    remaining: Decimal | None
 
 
 class PlaidLinkTokenResponse(BaseModel):
