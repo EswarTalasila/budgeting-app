@@ -12,17 +12,17 @@
   }
 
   body {
-    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased;
+    @apply bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased;
     font-size: 14px;
     line-height: 1.5;
   }
 
   ::selection {
-    @apply bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900;
+    @apply bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900;
   }
 
   *:focus-visible {
-    @apply outline-none ring-2 ring-slate-900 dark:ring-slate-100 ring-offset-2 ring-offset-white dark:ring-offset-slate-950;
+    @apply outline-none ring-2 ring-zinc-900 dark:ring-zinc-100 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950;
   }
 
   input:focus-visible,
@@ -43,27 +43,27 @@
   }
 
   .btn-primary {
-    @apply btn bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:border-slate-800 active:bg-slate-950 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-100 dark:hover:bg-white dark:hover:border-white dark:active:bg-slate-200;
+    @apply btn bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800 hover:border-zinc-800 active:bg-zinc-950 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 dark:hover:bg-white dark:hover:border-white dark:active:bg-zinc-200;
   }
 
   .btn-secondary {
-    @apply btn bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-50 active:bg-slate-100 dark:active:bg-slate-800/80;
+    @apply btn bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 active:bg-zinc-100 dark:active:bg-zinc-800/80;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 h-9 px-3 text-[13px] font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 h-9 px-3 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .input {
-    @apply w-full h-9 px-3 text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-slate-900 dark:focus:border-slate-100 focus:ring-0 transition-colors duration-100 disabled:bg-slate-50 dark:disabled:bg-slate-900/50 disabled:text-slate-500;
+    @apply w-full h-9 px-3 text-[13px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100 focus:ring-0 transition-colors duration-100 disabled:bg-zinc-50 dark:disabled:bg-zinc-900/50 disabled:text-zinc-500;
   }
 
   .label {
-    @apply block text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.06em] mb-1.5;
+    @apply block text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.06em] mb-1.5;
   }
 
   .panel {
-    @apply bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800;
+    @apply bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800;
   }
 
   .table-base {
@@ -71,11 +71,11 @@
   }
 
   .table-base thead th {
-    @apply text-left px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.06em] border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50;
+    @apply text-left px-5 py-2.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.06em] border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50;
   }
 
   .table-base tbody td {
-    @apply px-5 py-3 border-b border-slate-100 dark:border-slate-800/60;
+    @apply px-5 py-3 border-b border-zinc-100 dark:border-zinc-800/60;
   }
 
   .table-base tbody tr:last-child td {

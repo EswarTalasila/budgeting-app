@@ -15,7 +15,7 @@ const CATEGORY_DOT = {
   Shopping: 'bg-pink-500',
   Transportation: 'bg-blue-500',
   Entertainment: 'bg-purple-500',
-  'Bills & Utilities': 'bg-slate-500',
+  'Bills & Utilities': 'bg-zinc-500',
   Health: 'bg-emerald-500',
   Travel: 'bg-sky-500',
   Income: 'bg-green-600',
@@ -23,10 +23,10 @@ const CATEGORY_DOT = {
 };
 
 function CategoryTag({ category }) {
-  if (!category) return <span className="text-[12px] text-slate-400 dark:text-slate-500">—</span>;
+  if (!category) return <span className="text-[12px] text-zinc-400 dark:text-zinc-500">—</span>;
   return (
-    <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-700 dark:text-slate-300">
-      <span className={`w-1.5 h-1.5 ${CATEGORY_DOT[category] || 'bg-slate-400'}`} />
+    <span className="inline-flex items-center gap-1.5 text-[12px] text-zinc-700 dark:text-zinc-300">
+      <span className={`w-1.5 h-1.5 ${CATEGORY_DOT[category] || 'bg-zinc-400'}`} />
       {category}
     </span>
   );
@@ -68,12 +68,12 @@ export default function Transactions() {
 
   return (
     <div>
-      <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-800 flex items-end justify-between gap-4">
+      <div className="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.08em]">
+          <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em]">
             Activity
           </p>
-          <h1 className="mt-1.5 text-[28px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="mt-1.5 text-[28px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
             Transactions
           </h1>
         </div>
@@ -106,7 +106,7 @@ export default function Transactions() {
             <div>
               <label className="label">Amount</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[13px]">$</span>
                 <input
                   required
                   type="number"
@@ -135,7 +135,7 @@ export default function Transactions() {
             </div>
           )}
           <div className="mt-5 flex items-center justify-between">
-            <p className="text-[12px] text-slate-500 dark:text-slate-400">
+            <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
               Category is auto-assigned by AI based on the description.
             </p>
             <div className="flex gap-2">
@@ -150,7 +150,7 @@ export default function Transactions() {
         </form>
       )}
 
-      {loading && <p className="text-[13px] text-slate-500 dark:text-slate-400">Loading…</p>}
+      {loading && <p className="text-[13px] text-zinc-500 dark:text-zinc-400">Loading…</p>}
       {error && (
         <div className="text-[13px] text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-3 py-2">
           {error}
@@ -161,8 +161,8 @@ export default function Transactions() {
         <div className="panel">
           {transactions.length === 0 ? (
             <div className="p-16 text-center">
-              <p className="text-[13px] text-slate-600 dark:text-slate-300">No transactions for this month.</p>
-              <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-1">
+              <p className="text-[13px] text-zinc-600 dark:text-zinc-300">No transactions for this month.</p>
+              <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1">
                 Click "New transaction" to add one manually.
               </p>
             </div>
@@ -179,14 +179,14 @@ export default function Transactions() {
               </thead>
               <tbody>
                 {transactions.map((t) => (
-                  <tr key={t.id} className="group hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors duration-100">
-                    <td className="text-slate-500 dark:text-slate-400 text-[12px] whitespace-nowrap tabular-nums">
+                  <tr key={t.id} className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
+                    <td className="text-zinc-500 dark:text-zinc-400 text-[12px] whitespace-nowrap tabular-nums">
                       {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                       })}
                     </td>
-                    <td className="text-slate-900 dark:text-slate-100 font-medium truncate max-w-[320px]">
+                    <td className="text-zinc-900 dark:text-zinc-100 font-medium truncate max-w-[320px]">
                       {t.description}
                     </td>
                     <td>
@@ -194,7 +194,7 @@ export default function Transactions() {
                     </td>
                     <td
                       className={`text-right font-semibold tabular-nums ${
-                        t.amount < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'
+                        t.amount < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'
                       }`}
                     >
                       {t.amount < 0 ? '+' : '−'}
@@ -203,7 +203,7 @@ export default function Transactions() {
                     <td className="text-right">
                       <button
                         onClick={() => handleDelete(t.id)}
-                        className="text-[12px] text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+                        className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
                       >
                         Delete
                       </button>

@@ -29,16 +29,16 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 flex items-center justify-center px-6">
+    <div className="min-h-screen bg-zinc-50/60 dark:bg-zinc-950 flex items-center justify-center px-6">
       <div className="w-full max-w-[360px] fade-in">
         <div className="flex flex-col items-center mb-10">
-          <div className="w-9 h-9 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center text-sm font-bold tracking-tight mb-5">
+          <div className="w-9 h-9 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-sm font-bold tracking-tight mb-5">
             T
           </div>
-          <h1 className="text-[22px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="text-[22px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
             {mode === 'login' ? 'Sign in to Tally' : 'Create your Tally account'}
           </h1>
-          <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-1.5">
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1.5">
             {mode === 'login' ? 'Enter your email to continue.' : 'Start tracking your finances.'}
           </p>
         </div>
@@ -81,8 +81,8 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
-          <p className="text-[13px] text-slate-500 dark:text-slate-400">
+        <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800 text-center">
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               type="button"
@@ -90,7 +90,7 @@ export default function Login() {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setError(null);
               }}
-              className="text-slate-900 dark:text-slate-100 font-medium hover:underline underline-offset-2"
+              className="text-zinc-900 dark:text-zinc-100 font-medium hover:underline underline-offset-2"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>

@@ -16,10 +16,10 @@ function fmtCents(n) {
 function Stat({ label, value, accent }) {
   return (
     <div className="panel p-5">
-      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.06em]">
+      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.06em]">
         {label}
       </p>
-      <p className={`mt-3 text-[26px] font-semibold tracking-tight tabular-nums ${accent || 'text-slate-900 dark:text-slate-50'}`}>
+      <p className={`mt-3 text-[26px] font-semibold tracking-tight tabular-nums ${accent || 'text-zinc-900 dark:text-zinc-50'}`}>
         {value}
       </p>
     </div>
@@ -54,11 +54,11 @@ function BudgetRow({ item, month, onSaved }) {
   }
 
   return (
-    <div className="px-5 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors duration-100 group">
+    <div className="px-5 py-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors duration-100 group">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-[13px] font-medium text-slate-900 dark:text-slate-100">{item.category}</span>
-          <span className="text-[12px] text-slate-500 dark:text-slate-400 tabular-nums">
+          <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100">{item.category}</span>
+          <span className="text-[12px] text-zinc-500 dark:text-zinc-400 tabular-nums">
             {limit !== null ? `${fmtCents(spent)} / ${fmtCents(limit)}` : `${fmtCents(spent)} spent`}
           </span>
         </div>
@@ -66,7 +66,7 @@ function BudgetRow({ item, month, onSaved }) {
           {limit !== null ? (
             <span
               className={`text-[12px] font-medium tabular-nums ${
-                over ? 'text-red-700 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'
+                over ? 'text-red-700 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'
               }`}
             >
               {over ? `${fmtCents(spent - limit)} over` : `${fmtCents(remaining)} left`}
@@ -74,7 +74,7 @@ function BudgetRow({ item, month, onSaved }) {
           ) : editing ? (
             <form onSubmit={handleSave} className="flex items-center gap-1.5">
               <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[12px]">$</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400 text-[12px]">$</span>
                 <input
                   autoFocus
                   type="number"
@@ -83,21 +83,21 @@ function BudgetRow({ item, month, onSaved }) {
                   required
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
-                  className="h-7 pl-5 pr-2 w-24 text-[12px] bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-slate-900 dark:focus:border-slate-100 focus:ring-0 text-slate-900 dark:text-slate-100"
+                  className="h-7 pl-5 pr-2 w-24 text-[12px] bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100 focus:ring-0 text-zinc-900 dark:text-zinc-100"
                   placeholder="0.00"
                 />
               </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="h-7 px-2 text-[12px] font-medium bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border border-slate-900 dark:border-slate-100 hover:bg-slate-800 dark:hover:bg-white"
+                className="h-7 px-2 text-[12px] font-medium bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border border-zinc-900 dark:border-zinc-100 hover:bg-zinc-800 dark:hover:bg-white"
               >
                 {saving ? '…' : 'Save'}
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="h-7 px-2 text-[12px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                className="h-7 px-2 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
               >
                 Cancel
               </button>
@@ -105,23 +105,23 @@ function BudgetRow({ item, month, onSaved }) {
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="text-[12px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+              className="text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
             >
               + Set budget
             </button>
           )}
         </div>
       </div>
-      <div className="h-[3px] bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      <div className="h-[3px] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
         <div
           className={`h-full transition-[width] duration-500 ease-out ${
             limit === null
-              ? 'bg-slate-300 dark:bg-slate-700'
+              ? 'bg-zinc-300 dark:bg-zinc-700'
               : over
               ? 'bg-red-500'
               : pct > 80
               ? 'bg-amber-500'
-              : 'bg-slate-900 dark:bg-slate-100'
+              : 'bg-zinc-900 dark:bg-zinc-100'
           }`}
           style={{ width: limit !== null ? `${pct}%` : '100%', opacity: limit === null ? 0.5 : 1 }}
         />
@@ -171,23 +171,23 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
-        <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.08em]">
+      <div className="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+        <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em]">
           Overview
         </p>
         <div className="mt-1.5 flex items-baseline justify-between gap-4">
-          <h1 className="text-[28px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="text-[28px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
             {formattedMonth}
           </h1>
           <div className="flex items-center gap-3">
             {syncing && (
-              <span className="text-[12px] text-slate-500 dark:text-slate-400 inline-flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 bg-slate-500 dark:bg-slate-400 animate-pulse" />
+              <span className="text-[12px] text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 bg-zinc-500 dark:bg-zinc-400 animate-pulse" />
                 Syncing…
               </span>
             )}
             {totalLimit > 0 && (
-              <span className="text-[13px] text-slate-500 dark:text-slate-400 tabular-nums">
+              <span className="text-[13px] text-zinc-500 dark:text-zinc-400 tabular-nums">
                 {overallPct.toFixed(0)}% of budget used
               </span>
             )}
@@ -201,18 +201,18 @@ export default function Dashboard() {
         <Stat
           label="Remaining"
           value={totalLimit > 0 ? fmt(totalRemaining) : '—'}
-          accent={totalLimit > 0 && totalRemaining < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-slate-50'}
+          accent={totalLimit > 0 && totalRemaining < 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-zinc-50'}
         />
       </div>
 
       <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight">By category</h2>
-        <span className="text-[12px] text-slate-500 dark:text-slate-400">
+        <h2 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">By category</h2>
+        <span className="text-[12px] text-zinc-500 dark:text-zinc-400">
           {summary.length} {summary.length === 1 ? 'category' : 'categories'}
         </span>
       </div>
 
-      {loading && <p className="text-[13px] text-slate-500 dark:text-slate-400">Loading…</p>}
+      {loading && <p className="text-[13px] text-zinc-500 dark:text-zinc-400">Loading…</p>}
       {error && (
         <div className="text-[13px] text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-3 py-2">
           {error}
@@ -223,13 +223,13 @@ export default function Dashboard() {
         <div className="panel">
           {summary.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-[13px] text-slate-600 dark:text-slate-300">No activity this month yet.</p>
-              <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-1">
+              <p className="text-[13px] text-zinc-600 dark:text-zinc-300">No activity this month yet.</p>
+              <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1">
                 Connect a bank or add a transaction to see spending here.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
               {summary.map((item) => (
                 <BudgetRow key={item.category} item={item} month={month} onSaved={load} />
               ))}

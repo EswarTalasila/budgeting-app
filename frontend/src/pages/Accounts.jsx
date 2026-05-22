@@ -46,12 +46,12 @@ export default function Accounts() {
 
   return (
     <div>
-      <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-800 flex items-end justify-between gap-4">
+      <div className="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.08em]">
+          <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em]">
             Connections
           </p>
-          <h1 className="mt-1.5 text-[28px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="mt-1.5 text-[28px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
             Accounts
           </h1>
         </div>
@@ -77,13 +77,13 @@ export default function Accounts() {
       )}
 
       {loading ? (
-        <p className="text-[13px] text-slate-500 dark:text-slate-400">Loading…</p>
+        <p className="text-[13px] text-zinc-500 dark:text-zinc-400">Loading…</p>
       ) : (
         <div className="panel">
           {accounts.length === 0 ? (
             <div className="p-16 text-center">
-              <p className="text-[13px] text-slate-600 dark:text-slate-300">No banks connected yet.</p>
-              <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-1">
+              <p className="text-[13px] text-zinc-600 dark:text-zinc-300">No banks connected yet.</p>
+              <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1">
                 Connect a bank via Plaid to automatically sync transactions.
               </p>
             </div>
@@ -98,17 +98,17 @@ export default function Accounts() {
               </thead>
               <tbody>
                 {accounts.map((a) => (
-                  <tr key={a.id} className="group hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors duration-100">
-                    <td className="text-slate-900 dark:text-slate-100 font-medium">
+                  <tr key={a.id} className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
+                    <td className="text-zinc-900 dark:text-zinc-100 font-medium">
                       {a.institution_name || 'Unknown bank'}
                     </td>
-                    <td className="text-[12px] text-slate-500 dark:text-slate-400">
+                    <td className="text-[12px] text-zinc-500 dark:text-zinc-400">
                       {a.last_cursor ? 'Synced' : 'Awaiting first sync'}
                     </td>
                     <td className="text-right">
                       <button
                         onClick={() => handleDisconnect(a.id)}
-                        className="text-[12px] text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+                        className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
                       >
                         Disconnect
                       </button>

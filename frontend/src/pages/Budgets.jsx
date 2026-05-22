@@ -63,12 +63,12 @@ export default function Budgets() {
 
   return (
     <div>
-      <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-800 flex items-end justify-between gap-4">
+      <div className="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-[0.08em]">
+          <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em]">
             Planning
           </p>
-          <h1 className="mt-1.5 text-[28px] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="mt-1.5 text-[28px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
             Budgets
           </h1>
         </div>
@@ -83,10 +83,10 @@ export default function Budgets() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
           <div className="panel p-5">
-            <h2 className="text-[14px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+            <h2 className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
               Set a budget
             </h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 mb-5">
+            <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5 mb-5">
               Save again to update an existing category.
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +105,7 @@ export default function Budgets() {
               <div>
                 <label className="label">Monthly limit</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[13px]">$</span>
                   <input
                     type="number"
                     min="0"
@@ -132,20 +132,20 @@ export default function Budgets() {
 
         <div className="lg:col-span-3">
           <div className="panel">
-            <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+            <div className="px-5 py-3.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+              <h2 className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 Current budgets
               </h2>
               {budgets.length > 0 && (
-                <span className="text-[12px] text-slate-500 dark:text-slate-400 tabular-nums">
+                <span className="text-[12px] text-zinc-500 dark:text-zinc-400 tabular-nums">
                   Total {fmt(total)}
                 </span>
               )}
             </div>
             {budgets.length === 0 ? (
               <div className="p-16 text-center">
-                <p className="text-[13px] text-slate-600 dark:text-slate-300">No budgets set yet.</p>
-                <p className="text-[12px] text-slate-400 dark:text-slate-500 mt-1">
+                <p className="text-[13px] text-zinc-600 dark:text-zinc-300">No budgets set yet.</p>
+                <p className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1">
                   Add one to start tracking your spending.
                 </p>
               </div>
@@ -159,9 +159,9 @@ export default function Budgets() {
                 </thead>
                 <tbody>
                   {budgets.map((b) => (
-                    <tr key={b.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors duration-100">
-                      <td className="text-slate-900 dark:text-slate-100 font-medium">{b.category}</td>
-                      <td className="text-right text-slate-900 dark:text-slate-100 font-semibold tabular-nums">
+                    <tr key={b.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
+                      <td className="text-zinc-900 dark:text-zinc-100 font-medium">{b.category}</td>
+                      <td className="text-right text-zinc-900 dark:text-zinc-100 font-semibold tabular-nums">
                         {fmt(b.monthly_limit)}
                       </td>
                     </tr>
