@@ -28,6 +28,10 @@ export function deleteTransaction(id) {
   return api.delete(`/transactions/${id}`);
 }
 
+export function recategorizeOther() {
+  return api.post('/transactions/recategorize').then((r) => r.data);
+}
+
 export function getBudgets(month) {
   return api.get('/budgets', { params: { month } }).then((r) => r.data);
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
-import { createTransaction, deleteTransaction } from '../lib/api';
+import { createTransaction, deleteTransaction, recategorizeOther } from '../lib/api';
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -44,6 +44,26 @@ export default function Transactions() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [recategorizing, setRecategorizing] = useState(false);
+  const [recategorizeMsg, setRecategorizeMsg] = useState(null);
+
+  async function handleRecategorize() {
+    setRecategorizing(true);
+    setRecategorizeMsg(null);
+    try {
+      const result = await recategorizeOther();
+      setRecategorizeMsg(
+        result.total === 0
+          ? 'Nothing to recategorize.'
+          : `Updated ${result.updated} of ${result.total} "Other" transactions.`
+      );
+      refetch();
+    } catch (err) {
+      setRecategorizeMsg(err.response?.data?.detail || 'Failed to recategorize');
+    } finally {
+      setRecategorizing(false);
+    }
+  }
 
   async function handleAdd(e) {
     e.preventDefault();
@@ -84,11 +104,25 @@ export default function Transactions() {
             onChange={(e) => setMonth(e.target.value)}
             className="input w-auto"
           />
+          <button
+            onClick={handleRecategorize}
+            disabled={recategorizing}
+            className="btn-secondary"
+            title="Re-run AI on transactions categorized as Other"
+          >
+            {recategorizing ? 'Working…' : 'AI recategorize'}
+          </button>
           <button onClick={() => setShowForm((v) => !v)} className="btn-primary">
             {showForm ? 'Cancel' : 'New transaction'}
           </button>
         </div>
       </div>
+
+      {recategorizeMsg && (
+        <div className="mb-4 text-[13px] text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 px-3 py-2">
+          {recategorizeMsg}
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={handleAdd} className="panel p-5 mb-6 fade-in">

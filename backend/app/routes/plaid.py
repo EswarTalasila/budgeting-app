@@ -14,6 +14,7 @@ from app.schemas import (
     PlaidSyncResponse,
 )
 from app.lib import plaid as plaid_lib
+from app.lib.claude import categorize_transaction
 
 router = APIRouter()
 
@@ -41,6 +42,21 @@ def map_category(plaid_tx: dict) -> str:
     pfc = plaid_tx.get("personal_finance_category") or {}
     primary = pfc.get("primary") if isinstance(pfc, dict) else None
     return PLAID_CATEGORY_MAP.get(primary, "Other")
+
+
+async def categorize_with_fallback(plaid_tx: dict) -> str:
+    plaid_category = map_category(plaid_tx)
+    if plaid_category != "Other":
+        return plaid_category
+
+    description = plaid_tx.get("name") or plaid_tx.get("merchant_name") or ""
+    if not description:
+        return "Other"
+
+    try:
+        return await categorize_transaction(description, float(plaid_tx.get("amount") or 0))
+    except Exception:
+        return "Other"
 
 
 @router.get("/accounts", response_model=list[AccountOut])
@@ -134,7 +150,7 @@ async def sync_transactions(
                     plaid_transaction_id=pid,
                     amount=Decimal(str(t.get("amount", 0))),
                     description=t.get("name") or t.get("merchant_name") or "Unknown",
-                    category=map_category(t),
+                    category=await categorize_with_fallback(t),
                     date=tx_date,
                     is_manual=False,
                 )
@@ -150,7 +166,7 @@ async def sync_transactions(
                 if tx:
                     tx.amount = Decimal(str(t.get("amount", 0)))
                     tx.description = t.get("name") or t.get("merchant_name") or tx.description
-                    tx.category = map_category(t)
+                    tx.category = await categorize_with_fallback(t)
                     total_modified += 1
 
             for t in data["removed"]:

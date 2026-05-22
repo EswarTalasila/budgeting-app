@@ -79,6 +79,33 @@ async def update_transaction(
     return tx
 
 
+@router.post("/recategorize")
+async def recategorize_uncategorized(
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Transaction).where(
+            Transaction.user_id == user_id,
+            Transaction.category == "Other",
+        )
+    )
+    txs = result.scalars().all()
+
+    updated = 0
+    for tx in txs:
+        try:
+            new_category = await categorize_transaction(tx.description, float(tx.amount))
+        except Exception:
+            continue
+        if new_category and new_category != "Other":
+            tx.category = new_category
+            updated += 1
+
+    await db.commit()
+    return {"updated": updated, "total": len(txs)}
+
+
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_transaction(
     transaction_id: uuid.UUID,
