@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from jose import jwt
 from app.database import get_db
+from app.middleware.auth import get_current_user
 from app.models import User
-from app.schemas import UserCreate, UserLogin, TokenOut
+from app.schemas import UserCreate, UserLogin, TokenOut, UserOut
 
 router = APIRouter()
 
@@ -46,3 +47,15 @@ async def login(body: UserLogin, db: AsyncSession = Depends(get_db)):
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return TokenOut(access_token=create_token(user.id))
+
+
+@router.get("/me", response_model=UserOut)
+async def me(
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user

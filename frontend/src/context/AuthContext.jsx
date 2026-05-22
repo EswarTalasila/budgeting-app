@@ -1,14 +1,22 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { getMe } from '../lib/api';
 
 const AuthContext = createContext(null);
 
-function decodeEmailHint() {
-  return localStorage.getItem('email') || null;
-}
-
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
-  const [email, setEmail] = useState(decodeEmailHint);
+  const [email, setEmail] = useState(() => localStorage.getItem('email'));
+
+  useEffect(() => {
+    if (token && !email) {
+      getMe()
+        .then((u) => {
+          localStorage.setItem('email', u.email);
+          setEmail(u.email);
+        })
+        .catch(() => {});
+    }
+  }, [token, email]);
 
   function saveToken(t, userEmail) {
     localStorage.setItem('token', t);
