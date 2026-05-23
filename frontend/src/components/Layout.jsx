@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import Logo from './Logo';
 
 function Icon({ name, className = 'w-[15px] h-[15px]' }) {
   const icons = {
@@ -68,7 +69,7 @@ function UserMenu() {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-2.5 px-2 h-10 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors duration-100"
       >
-        <div className="w-7 h-7 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
+        <div className="w-7 h-7 bg-emerald-700 dark:bg-emerald-500 text-white flex items-center justify-center text-[12px] font-semibold flex-shrink-0">
           {initial}
         </div>
         <span className="flex-1 text-left text-[12px] font-medium text-zinc-700 dark:text-zinc-200 truncate">
@@ -108,11 +109,9 @@ export default function Layout({ children }) {
       <aside className="w-[220px] bg-zinc-50/60 dark:bg-zinc-900/40 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
         <div className="h-14 px-5 flex items-center border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
-            <div className="w-[22px] h-[22px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-[11px] font-bold tracking-tight">
-              T
-            </div>
+            <Logo className="w-[22px] h-[22px]" />
             <span className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">
-              Tally
+              Clove
             </span>
           </div>
         </div>
