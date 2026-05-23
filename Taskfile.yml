@@ -41,6 +41,13 @@ tasks:
     cmds:
       - npm run dev
 
+  test:
+    desc: Run backend tests
+    dir: backend
+    cmds:
+      - docker exec budgeting-app-postgres-1 psql -U postgres -c "CREATE DATABASE budgeting_test" 2>/dev/null || true
+      - ../.venv/bin/pytest -v
+
   stop:
     desc: Stop backend, frontend, and Postgres
     cmds:
