@@ -24,6 +24,10 @@ export function updateTransaction(id, data) {
   return api.patch(`/transactions/${id}`, data).then((r) => r.data);
 }
 
+export function updateTransactionNotes(id, notes) {
+  return api.patch(`/transactions/${id}`, { notes }).then((r) => r.data);
+}
+
 export function deleteTransaction(id) {
   return api.delete(`/transactions/${id}`);
 }

@@ -144,13 +144,21 @@ async def sync_transactions(
                 if isinstance(tx_date, str):
                     tx_date = date.fromisoformat(tx_date)
 
+                loc = t.get("location") or {}
+                pfc = t.get("personal_finance_category") or {}
                 tx = Transaction(
                     user_id=user_id,
                     account_id=account.id,
                     plaid_transaction_id=pid,
                     amount=Decimal(str(t.get("amount", 0))),
                     description=t.get("name") or t.get("merchant_name") or "Unknown",
+                    merchant_name=t.get("merchant_name"),
                     category=await categorize_with_fallback(t),
+                    category_detailed=pfc.get("detailed") if isinstance(pfc, dict) else None,
+                    payment_channel=t.get("payment_channel"),
+                    pending=bool(t.get("pending", False)),
+                    location_city=loc.get("city") if isinstance(loc, dict) else None,
+                    location_region=loc.get("region") if isinstance(loc, dict) else None,
                     date=tx_date,
                     is_manual=False,
                 )
@@ -164,9 +172,17 @@ async def sync_transactions(
                 )
                 tx = existing.scalar_one_or_none()
                 if tx:
+                    loc = t.get("location") or {}
+                    pfc = t.get("personal_finance_category") or {}
                     tx.amount = Decimal(str(t.get("amount", 0)))
                     tx.description = t.get("name") or t.get("merchant_name") or tx.description
+                    tx.merchant_name = t.get("merchant_name") or tx.merchant_name
                     tx.category = await categorize_with_fallback(t)
+                    tx.category_detailed = pfc.get("detailed") if isinstance(pfc, dict) else tx.category_detailed
+                    tx.payment_channel = t.get("payment_channel") or tx.payment_channel
+                    tx.pending = bool(t.get("pending", False))
+                    tx.location_city = loc.get("city") if isinstance(loc, dict) else tx.location_city
+                    tx.location_region = loc.get("region") if isinstance(loc, dict) else tx.location_region
                     total_modified += 1
 
             for t in data["removed"]:

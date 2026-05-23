@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
-import { createTransaction, deleteTransaction, recategorizeOther } from '../lib/api';
+import { createTransaction, deleteTransaction, recategorizeOther, updateTransactionNotes } from '../lib/api';
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -52,6 +52,80 @@ function CategoryTag({ category }) {
   );
 }
 
+function prettyChannel(c) {
+  if (!c) return null;
+  return c.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+function prettyDetailed(c) {
+  if (!c) return null;
+  return c.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+function DetailField({ label, value }) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.06em]">
+        {label}
+      </p>
+      <p className="text-[13px] text-zinc-900 dark:text-zinc-100 mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function ExpandedRow({ tx, onSaveNotes }) {
+  const [notes, setNotes] = useState(tx.notes || '');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    if (notes === (tx.notes || '')) return;
+    setSaving(true);
+    try {
+      await onSaveNotes(tx.id, notes);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const location = [tx.location_city, tx.location_region].filter(Boolean).join(', ');
+
+  return (
+    <tr className="bg-zinc-50/50 dark:bg-zinc-900/40">
+      <td colSpan={6} className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800/60">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3 mb-4">
+          <DetailField label="Source" value={tx.is_manual ? 'Manual entry' : tx.account_institution || 'Bank'} />
+          <DetailField label="Merchant" value={tx.merchant_name} />
+          <DetailField label="Payment channel" value={prettyChannel(tx.payment_channel)} />
+          <DetailField label="Location" value={location} />
+          <DetailField label="Plaid category" value={prettyDetailed(tx.category_detailed)} />
+          <DetailField
+            label="Status"
+            value={tx.pending ? 'Pending' : 'Posted'}
+          />
+        </div>
+        <div>
+          <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.06em] mb-1.5">
+            Notes
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
+              placeholder="Add a note for yourself…"
+              className="input flex-1"
+            />
+            {saving && <span className="self-center text-[11px] text-zinc-400">Saving…</span>}
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function Transactions() {
   const [month, setMonth] = useState(currentMonth());
   const { transactions, loading, error, refetch } = useTransactions(month);
@@ -68,6 +142,12 @@ export default function Transactions() {
   const [recategorizeMsg, setRecategorizeMsg] = useState(null);
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
+  const [expanded, setExpanded] = useState(null);
+
+  async function handleSaveNotes(id, notes) {
+    await updateTransactionNotes(id, notes);
+    refetch();
+  }
 
   const sorted = useMemo(() => {
     const copy = [...transactions];
@@ -267,38 +347,79 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((t) => (
-                  <tr key={t.id} className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
-                    <td className="text-zinc-500 dark:text-zinc-400 text-[12px] whitespace-nowrap tabular-nums">
-                      {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </td>
-                    <td className="text-zinc-900 dark:text-zinc-100 font-medium truncate max-w-[320px]">
-                      {t.description}
-                    </td>
-                    <td>
-                      <CategoryTag category={t.category} />
-                    </td>
-                    <td
-                      className={`text-right font-semibold tabular-nums ${
-                        t.amount < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'
-                      }`}
-                    >
-                      {t.amount < 0 ? '+' : '−'}
-                      {fmt(t.amount)}
-                    </td>
-                    <td className="text-right">
-                      <button
-                        onClick={() => handleDelete(t.id)}
-                        className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+                {sorted.map((t) => {
+                  const isOpen = expanded === t.id;
+                  const source = t.is_manual ? 'Manual' : t.account_institution;
+                  return (
+                    <Fragment key={t.id}>
+                      <tr
+                        onClick={() => setExpanded(isOpen ? null : t.id)}
+                        className="group cursor-pointer hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100"
                       >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        <td className="text-zinc-500 dark:text-zinc-400 text-[12px] whitespace-nowrap tabular-nums">
+                          {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </td>
+                        <td className="max-w-[340px]">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`inline-block text-[10px] text-zinc-400 dark:text-zinc-500 transition-transform duration-100 ${
+                                isOpen ? 'rotate-90' : ''
+                              }`}
+                            >
+                              ▸
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-zinc-900 dark:text-zinc-100 font-medium truncate">
+                                  {t.description}
+                                </span>
+                                {t.pending && (
+                                  <span className="inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50">
+                                    Pending
+                                  </span>
+                                )}
+                                {t.notes && (
+                                  <span title={t.notes} className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                    ●
+                                  </span>
+                                )}
+                              </div>
+                              {source && (
+                                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">
+                                  {source}
+                                  {t.location_city && ` · ${t.location_city}`}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <CategoryTag category={t.category} />
+                        </td>
+                        <td
+                          className={`text-right font-semibold tabular-nums ${
+                            t.amount < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'
+                          }`}
+                        >
+                          {t.amount < 0 ? '+' : '−'}
+                          {fmt(t.amount)}
+                        </td>
+                        <td className="text-right" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleDelete(t.id)}
+                            className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                      {isOpen && <ExpandedRow tx={t} onSaveNotes={handleSaveNotes} />}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           )}

@@ -36,15 +36,24 @@ class TransactionCreate(BaseModel):
 class TransactionUpdate(BaseModel):
     category: str | None = None
     description: str | None = None
+    notes: str | None = None
 
 
 class TransactionOut(BaseModel):
     id: uuid.UUID
     amount: Decimal
     description: str
+    merchant_name: str | None = None
     category: str | None
+    category_detailed: str | None = None
+    payment_channel: str | None = None
+    pending: bool = False
+    location_city: str | None = None
+    location_region: str | None = None
+    notes: str | None = None
     date: date
     is_manual: bool
+    account_institution: str | None = None
 
     model_config = {"from_attributes": True}
 

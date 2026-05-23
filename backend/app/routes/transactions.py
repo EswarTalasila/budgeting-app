@@ -3,11 +3,32 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import Transaction
 from app.schemas import TransactionCreate, TransactionUpdate, TransactionOut
 from app.lib.claude import categorize_transaction
+
+
+def to_out(tx: Transaction) -> TransactionOut:
+    institution = tx.account.institution_name if tx.account else None
+    return TransactionOut(
+        id=tx.id,
+        amount=tx.amount,
+        description=tx.description,
+        merchant_name=tx.merchant_name,
+        category=tx.category,
+        category_detailed=tx.category_detailed,
+        payment_channel=tx.payment_channel,
+        pending=tx.pending,
+        location_city=tx.location_city,
+        location_region=tx.location_region,
+        notes=tx.notes,
+        date=tx.date,
+        is_manual=tx.is_manual,
+        account_institution=institution,
+    )
 
 router = APIRouter()
 
@@ -18,7 +39,12 @@ async def list_transactions(
     db: AsyncSession = Depends(get_db),
     user_id: uuid.UUID = Depends(get_current_user),
 ):
-    query = select(Transaction).where(Transaction.user_id == user_id).order_by(Transaction.date.desc())
+    query = (
+        select(Transaction)
+        .options(selectinload(Transaction.account))
+        .where(Transaction.user_id == user_id)
+        .order_by(Transaction.date.desc())
+    )
     if month:
         year, m = month.split("-")
         query = query.where(
@@ -28,7 +54,7 @@ async def list_transactions(
             else date(int(year) + 1, 1, 1),
         )
     result = await db.execute(query)
-    return result.scalars().all()
+    return [to_out(tx) for tx in result.scalars().all()]
 
 
 @router.post("/", response_model=TransactionOut, status_code=status.HTTP_201_CREATED)
@@ -51,8 +77,8 @@ async def create_transaction(
     )
     db.add(tx)
     await db.commit()
-    await db.refresh(tx)
-    return tx
+    await db.refresh(tx, attribute_names=["account"])
+    return to_out(tx)
 
 
 @router.patch("/{transaction_id}", response_model=TransactionOut)
@@ -73,10 +99,12 @@ async def update_transaction(
         tx.category = body.category
     if body.description is not None:
         tx.description = body.description
+    if body.notes is not None:
+        tx.notes = body.notes
 
     await db.commit()
-    await db.refresh(tx)
-    return tx
+    await db.refresh(tx, attribute_names=["account"])
+    return to_out(tx)
 
 
 @router.post("/recategorize")
