@@ -4,6 +4,42 @@ import { login, register } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 
+function friendlyError(err, mode) {
+  const status = err.response?.status;
+  const detail = err.response?.data?.detail;
+
+  if (!err.response) {
+    return { message: "Can't reach the server. Check your connection and try again." };
+  }
+
+  if (status === 429) {
+    return { message: 'Too many attempts. Wait a minute and try again.' };
+  }
+
+  if (mode === 'register') {
+    if (typeof detail === 'string' && detail.toLowerCase().includes('already registered')) {
+      return {
+        message: 'An account with that email already exists.',
+        action: { label: 'Sign in instead', target: 'login' },
+      };
+    }
+    if (status === 422) {
+      return { message: 'Please enter a valid email and a password with at least 6 characters.' };
+    }
+  }
+
+  if (mode === 'login') {
+    if (status === 401) {
+      return { message: 'Email or password is incorrect.' };
+    }
+    if (status === 422) {
+      return { message: 'Please enter a valid email and password.' };
+    }
+  }
+
+  return { message: typeof detail === 'string' ? detail : 'Something went wrong. Please try again.' };
+}
+
 export default function Login() {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -23,10 +59,16 @@ export default function Login() {
       saveToken(data.access_token, email);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Something went wrong');
+      setError(friendlyError(err, mode));
     } finally {
       setLoading(false);
     }
+  }
+
+  function switchMode(next) {
+    setMode(next);
+    setError(null);
+    setPassword('');
   }
 
   return (
@@ -67,11 +109,25 @@ export default function Login() {
               placeholder="••••••••"
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             />
+            {mode === 'register' && (
+              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">
+                At least 6 characters.
+              </p>
+            )}
           </div>
 
           {error && (
             <div className="text-[13px] text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-3 py-2">
-              {error}
+              <p>{error.message}</p>
+              {error.action && (
+                <button
+                  type="button"
+                  onClick={() => switchMode(error.action.target)}
+                  className="mt-1 underline underline-offset-2 font-medium"
+                >
+                  {error.action.label}
+                </button>
+              )}
             </div>
           )}
 
@@ -85,10 +141,7 @@ export default function Login() {
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               type="button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'register' : 'login');
-                setError(null);
-              }}
+              onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
               className="text-zinc-900 dark:text-zinc-100 font-medium hover:underline underline-offset-2"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
