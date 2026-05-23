@@ -23,7 +23,7 @@ async def categorize_transaction(description: str, amount: float) -> str:
         f"Reply with only the category name, nothing else."
     )
     message = await client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-haiku-4-5-20251001",
         max_tokens=20,
         messages=[{"role": "user", "content": prompt}],
     )
