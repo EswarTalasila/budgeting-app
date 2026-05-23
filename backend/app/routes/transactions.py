@@ -51,12 +51,12 @@ async def list_transactions(
         .order_by(Transaction.date.desc())
     )
     if month:
-        year, m = month.split("-")
+        year, m = (int(p) for p in month.split("-"))
+        month_start = date(year, m, 1)
+        month_end = date(year + 1, 1, 1) if m == 12 else date(year, m + 1, 1)
         query = query.where(
-            Transaction.date >= date(int(year), int(m), 1),
-            Transaction.date < date(int(year), int(m) + 1 if int(m) < 12 else 1, 1)
-            if int(m) < 12
-            else date(int(year) + 1, 1, 1),
+            Transaction.date >= month_start,
+            Transaction.date < month_end,
         )
     result = await db.execute(query)
     return [to_out(tx) for tx in result.scalars().all()]

@@ -8,14 +8,26 @@ export function AuthProvider({ children }) {
   const [email, setEmail] = useState(() => localStorage.getItem('email'));
 
   useEffect(() => {
-    if (token && !email) {
-      getMe()
-        .then((u) => {
-          localStorage.setItem('email', u.email);
-          setEmail(u.email);
-        })
-        .catch(() => {});
-    }
+    if (!token || email) return;
+    let cancelled = false;
+    getMe()
+      .then((u) => {
+        if (cancelled) return;
+        localStorage.setItem('email', u.email);
+        setEmail(u.email);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('email');
+          setToken(null);
+          setEmail(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [token, email]);
 
   function saveToken(t, userEmail) {

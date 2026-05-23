@@ -8,6 +8,7 @@ import {
 } from '../lib/api';
 import CategoryDonut from '../components/CategoryDonut';
 import MonthlyTrend from '../components/MonthlyTrend';
+import Toast from '../components/Toast';
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -145,6 +146,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const load = useCallback(() => {
     return Promise.all([
@@ -154,18 +156,35 @@ export default function Dashboard() {
   }, [month]);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const accounts = await getPlaidAccounts();
-        if (accounts.length > 0) {
+        if (accounts.length > 0 && !cancelled) {
           setSyncing(true);
-          await syncPlaidTransactions().catch(() => {});
-          setSyncing(false);
+          try {
+            await syncPlaidTransactions();
+          } catch (err) {
+            if (!cancelled) {
+              setToast({
+                message:
+                  'Background sync failed. Try Sync transactions on the Accounts page.',
+                type: 'error',
+              });
+            }
+          }
+          if (!cancelled) setSyncing(false);
         }
-      } catch {}
+      } catch {
+        /* getPlaidAccounts can fail if user has no accounts yet; load() will still run */
+      }
+      if (cancelled) return;
       await load();
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
 
   const budgeted = summary.filter((s) => s.monthly_limit !== null);
@@ -254,6 +273,8 @@ export default function Dashboard() {
           )}
         </div>
       )}
+
+      <Toast message={toast?.message} type={toast?.type} onDismiss={() => setToast(null)} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from datetime import date
 from decimal import Decimal
@@ -166,86 +167,110 @@ async def sync_transactions(
     total_modified = 0
     total_removed = 0
 
+    claude_sem = asyncio.Semaphore(5)
+
+    async def categorize_one(t: dict) -> str:
+        async with claude_sem:
+            return await categorize_with_fallback(t)
+
+    def parse_date(value):
+        if isinstance(value, str):
+            return date.fromisoformat(value)
+        return value
+
     for account in accounts:
         cursor = account.last_cursor
         has_more = True
 
         while has_more:
             data = await plaid_lib.sync_transactions(account.plaid_access_token, cursor)
+            added = data["added"]
+            modified = data["modified"]
+            removed = data["removed"]
 
-            for t in data["added"]:
-                pid = t.get("transaction_id")
-                existing = await db.execute(
-                    select(Transaction).where(Transaction.plaid_transaction_id == pid)
+            pids = [
+                t.get("transaction_id")
+                for t in added + modified
+                if t.get("transaction_id")
+            ]
+            existing_by_pid: dict[str, Transaction] = {}
+            if pids:
+                rows = await db.execute(
+                    select(Transaction).where(Transaction.plaid_transaction_id.in_(pids))
                 )
-                if existing.scalar_one_or_none():
-                    continue
+                existing_by_pid = {tx.plaid_transaction_id: tx for tx in rows.scalars().all()}
 
-                tx_date = t.get("date")
-                if isinstance(tx_date, str):
-                    tx_date = date.fromisoformat(tx_date)
+            new_txs = [t for t in added if t.get("transaction_id") not in existing_by_pid]
+            new_categories = await asyncio.gather(*[categorize_one(t) for t in new_txs]) if new_txs else []
 
+            for t, category in zip(new_txs, new_categories):
                 loc = t.get("location") or {}
                 pfc = t.get("personal_finance_category") or {}
-                authorized = t.get("authorized_date")
-                if isinstance(authorized, str):
-                    authorized = date.fromisoformat(authorized)
                 tx = Transaction(
                     user_id=user_id,
                     account_id=account.id,
-                    plaid_transaction_id=pid,
+                    plaid_transaction_id=t.get("transaction_id"),
                     amount=Decimal(str(t.get("amount", 0))),
                     description=t.get("name") or t.get("merchant_name") or "Unknown",
                     merchant_name=t.get("merchant_name"),
                     merchant_website=t.get("website"),
                     merchant_logo_url=t.get("logo_url"),
                     iso_currency_code=t.get("iso_currency_code"),
-                    authorized_date=authorized,
-                    category=await categorize_with_fallback(t),
+                    authorized_date=parse_date(t.get("authorized_date")),
+                    category=category,
                     category_detailed=pfc.get("detailed") if isinstance(pfc, dict) else None,
                     payment_channel=t.get("payment_channel"),
                     pending=bool(t.get("pending", False)),
                     location_city=loc.get("city") if isinstance(loc, dict) else None,
                     location_region=loc.get("region") if isinstance(loc, dict) else None,
-                    date=tx_date,
+                    date=parse_date(t.get("date")),
                     is_manual=False,
                 )
                 db.add(tx)
                 total_added += 1
 
-            for t in data["modified"]:
-                pid = t.get("transaction_id")
-                existing = await db.execute(
-                    select(Transaction).where(Transaction.plaid_transaction_id == pid)
-                )
-                tx = existing.scalar_one_or_none()
-                if tx:
-                    loc = t.get("location") or {}
-                    pfc = t.get("personal_finance_category") or {}
-                    authorized = t.get("authorized_date")
-                    if isinstance(authorized, str):
-                        authorized = date.fromisoformat(authorized)
-                    tx.amount = Decimal(str(t.get("amount", 0)))
-                    tx.description = t.get("name") or t.get("merchant_name") or tx.description
-                    tx.merchant_name = t.get("merchant_name") or tx.merchant_name
-                    tx.merchant_website = t.get("website") or tx.merchant_website
-                    tx.merchant_logo_url = t.get("logo_url") or tx.merchant_logo_url
-                    tx.iso_currency_code = t.get("iso_currency_code") or tx.iso_currency_code
-                    tx.authorized_date = authorized or tx.authorized_date
-                    tx.category = await categorize_with_fallback(t)
-                    tx.category_detailed = pfc.get("detailed") if isinstance(pfc, dict) else tx.category_detailed
-                    tx.payment_channel = t.get("payment_channel") or tx.payment_channel
-                    tx.pending = bool(t.get("pending", False))
-                    tx.location_city = loc.get("city") if isinstance(loc, dict) else tx.location_city
-                    tx.location_region = loc.get("region") if isinstance(loc, dict) else tx.location_region
-                    total_modified += 1
+            mods_needing_categorize = [
+                t for t in modified
+                if existing_by_pid.get(t.get("transaction_id"))
+                and (existing_by_pid[t["transaction_id"]].category in (None, "Other"))
+            ]
+            mod_categories = (
+                await asyncio.gather(*[categorize_one(t) for t in mods_needing_categorize])
+                if mods_needing_categorize
+                else []
+            )
+            recategorize_map = {
+                t["transaction_id"]: cat for t, cat in zip(mods_needing_categorize, mod_categories)
+            }
 
-            for t in data["removed"]:
-                pid = t.get("transaction_id")
+            for t in modified:
+                tx = existing_by_pid.get(t.get("transaction_id"))
+                if not tx:
+                    continue
+                loc = t.get("location") or {}
+                pfc = t.get("personal_finance_category") or {}
+                tx.amount = Decimal(str(t.get("amount", 0)))
+                tx.description = t.get("name") or t.get("merchant_name") or tx.description
+                tx.merchant_name = t.get("merchant_name") or tx.merchant_name
+                tx.merchant_website = t.get("website") or tx.merchant_website
+                tx.merchant_logo_url = t.get("logo_url") or tx.merchant_logo_url
+                tx.iso_currency_code = t.get("iso_currency_code") or tx.iso_currency_code
+                tx.authorized_date = parse_date(t.get("authorized_date")) or tx.authorized_date
+                if t.get("transaction_id") in recategorize_map:
+                    tx.category = recategorize_map[t["transaction_id"]]
+                tx.category_detailed = pfc.get("detailed") if isinstance(pfc, dict) else tx.category_detailed
+                tx.payment_channel = t.get("payment_channel") or tx.payment_channel
+                tx.pending = bool(t.get("pending", False))
+                tx.location_city = loc.get("city") if isinstance(loc, dict) else tx.location_city
+                tx.location_region = loc.get("region") if isinstance(loc, dict) else tx.location_region
+                total_modified += 1
+
+            removed_pids = [t.get("transaction_id") for t in removed if t.get("transaction_id")]
+            if removed_pids:
                 await db.execute(
-                    delete(Transaction).where(Transaction.plaid_transaction_id == pid)
+                    delete(Transaction).where(Transaction.plaid_transaction_id.in_(removed_pids))
                 )
-                total_removed += 1
+                total_removed += len(removed_pids)
 
             cursor = data["next_cursor"]
             has_more = data["has_more"]

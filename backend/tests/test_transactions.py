@@ -47,6 +47,19 @@ async def test_create_transaction_uses_provided_category(client, headers):
     assert resp.json()["category"] == "Transportation"
 
 
+async def test_list_filter_handles_december(client, headers):
+    for d in ["2026-11-15", "2026-12-15", "2027-01-15"]:
+        await client.post(
+            "/api/transactions/",
+            headers=headers,
+            json={"amount": "5", "description": "Test", "date": d},
+        )
+    resp = await client.get("/api/transactions/?month=2026-12", headers=headers)
+    assert resp.status_code == 200
+    dates = [t["date"] for t in resp.json()]
+    assert dates == ["2026-12-15"]
+
+
 async def test_list_filters_by_month(client, headers, db_session):
     for d in ["2026-04-15", "2026-05-01", "2026-05-20"]:
         await client.post(
