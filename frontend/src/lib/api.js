@@ -28,6 +28,10 @@ export function updateTransactionNotes(id, notes) {
   return api.patch(`/transactions/${id}`, { notes }).then((r) => r.data);
 }
 
+export function setTransactionExcluded(id, excluded) {
+  return api.patch(`/transactions/${id}`, { excluded }).then((r) => r.data);
+}
+
 export function deleteTransaction(id) {
   return api.delete(`/transactions/${id}`);
 }

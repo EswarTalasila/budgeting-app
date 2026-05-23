@@ -69,6 +69,7 @@ async def budget_summary(
             Transaction.date < month_end,
             Transaction.amount > 0,
             Transaction.category.isnot(None),
+            Transaction.excluded.is_(False),
         )
         .group_by(Transaction.category)
     )
@@ -125,6 +126,7 @@ async def spending_trend(
             Transaction.date >= start,
             Transaction.amount > 0,
             Transaction.category != "Income",
+            Transaction.excluded.is_(False),
         )
         .group_by("month")
         .order_by("month")

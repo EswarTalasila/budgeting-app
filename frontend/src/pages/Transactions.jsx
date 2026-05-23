@@ -1,6 +1,12 @@
 import { useState, useMemo, Fragment } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
-import { createTransaction, deleteTransaction, recategorizeOther, updateTransactionNotes } from '../lib/api';
+import {
+  createTransaction,
+  deleteTransaction,
+  recategorizeOther,
+  updateTransactionNotes,
+  setTransactionExcluded,
+} from '../lib/api';
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -106,7 +112,7 @@ function fmtLongDate(iso) {
   });
 }
 
-function ExpandedRow({ tx, onSaveNotes }) {
+function ExpandedRow({ tx, onSaveNotes, onToggleExclude }) {
   const [notes, setNotes] = useState(tx.notes || '');
   const [saving, setSaving] = useState(false);
 
@@ -211,6 +217,25 @@ function ExpandedRow({ tx, onSaveNotes }) {
             </div>
           </div>
 
+          {!tx.is_manual && (
+            <div className="mt-5 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+              <div>
+                <p className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100">
+                  {tx.excluded ? 'Excluded from budget' : 'Included in budget'}
+                </p>
+                <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+                  Excluded transactions don't affect spending totals or charts.
+                </p>
+              </div>
+              <button
+                onClick={() => onToggleExclude(tx.id, !tx.excluded)}
+                className="btn-secondary"
+              >
+                {tx.excluded ? 'Include' : 'Exclude'}
+              </button>
+            </div>
+          )}
+
           <p className="mt-4 text-[10px] text-zinc-400 dark:text-zinc-600 font-mono">
             ID: {tx.id}
           </p>
@@ -241,6 +266,20 @@ export default function Transactions() {
   async function handleSaveNotes(id, notes) {
     await updateTransactionNotes(id, notes);
     refetch();
+  }
+
+  async function handleToggleExclude(id, excluded) {
+    await setTransactionExcluded(id, excluded);
+    refetch();
+  }
+
+  async function handleDelete(id) {
+    try {
+      await deleteTransaction(id);
+      refetch();
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to delete');
+    }
   }
 
   const sorted = useMemo(() => {
@@ -310,10 +349,6 @@ export default function Transactions() {
     }
   }
 
-  async function handleDelete(id) {
-    await deleteTransaction(id);
-    refetch();
-  }
 
   return (
     <div>
@@ -448,7 +483,9 @@ export default function Transactions() {
                     <Fragment key={t.id}>
                       <tr
                         onClick={() => setExpanded(isOpen ? null : t.id)}
-                        className="group cursor-pointer hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100"
+                        className={`group cursor-pointer hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100 ${
+                          t.excluded ? 'opacity-50' : ''
+                        }`}
                       >
                         <td className="text-zinc-500 dark:text-zinc-400 text-[12px] whitespace-nowrap tabular-nums">
                           {new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', {
@@ -473,6 +510,11 @@ export default function Transactions() {
                                 {t.pending && (
                                   <span className="inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50">
                                     Pending
+                                  </span>
+                                )}
+                                {t.excluded && (
+                                  <span className="inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                                    Excluded
                                   </span>
                                 )}
                                 {t.notes && (
@@ -502,15 +544,30 @@ export default function Transactions() {
                           {fmt(t.amount)}
                         </td>
                         <td className="text-right" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => handleDelete(t.id)}
-                            className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
-                          >
-                            Delete
-                          </button>
+                          {t.is_manual ? (
+                            <button
+                              onClick={() => handleDelete(t.id)}
+                              className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+                            >
+                              Delete
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleExclude(t.id, !t.excluded)}
+                              className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all duration-100 whitespace-nowrap"
+                            >
+                              {t.excluded ? 'Include' : 'Exclude'}
+                            </button>
+                          )}
                         </td>
                       </tr>
-                      {isOpen && <ExpandedRow tx={t} onSaveNotes={handleSaveNotes} />}
+                      {isOpen && (
+                        <ExpandedRow
+                          tx={t}
+                          onSaveNotes={handleSaveNotes}
+                          onToggleExclude={handleToggleExclude}
+                        />
+                      )}
                     </Fragment>
                   );
                 })}

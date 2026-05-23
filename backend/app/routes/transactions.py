@@ -31,6 +31,7 @@ def to_out(tx: Transaction) -> TransactionOut:
         notes=tx.notes,
         date=tx.date,
         is_manual=tx.is_manual,
+        excluded=tx.excluded,
         account_institution=institution,
     )
 
@@ -105,6 +106,8 @@ async def update_transaction(
         tx.description = body.description
     if body.notes is not None:
         tx.notes = body.notes
+    if body.excluded is not None:
+        tx.excluded = body.excluded
 
     await db.commit()
     await db.refresh(tx, attribute_names=["account"])
@@ -150,6 +153,11 @@ async def delete_transaction(
     tx = result.scalar_one_or_none()
     if not tx:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    if not tx.is_manual:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bank-synced transactions cannot be deleted. Exclude it from your budget instead.",
+        )
 
     await db.delete(tx)
     await db.commit()

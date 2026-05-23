@@ -37,6 +37,7 @@ class TransactionUpdate(BaseModel):
     category: str | None = None
     description: str | None = None
     notes: str | None = None
+    excluded: bool | None = None
 
 
 class TransactionOut(BaseModel):
@@ -57,6 +58,7 @@ class TransactionOut(BaseModel):
     notes: str | None = None
     date: date
     is_manual: bool
+    excluded: bool = False
     account_institution: str | None = None
 
     model_config = {"from_attributes": True}
