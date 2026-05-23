@@ -187,7 +187,7 @@ export default function Layout({ children }) {
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden min-w-0 pb-[env(safe-area-inset-bottom)]">
-        <header className="h-14 px-4 md:px-8 flex items-center justify-between md:justify-end border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0 mt-[env(safe-area-inset-top)]">
+        <header className="px-4 md:px-8 flex items-center justify-between md:justify-end border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]">
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden inline-flex items-center justify-center w-9 h-9 -ml-1.5 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100"
