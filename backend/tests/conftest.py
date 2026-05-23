@@ -12,12 +12,14 @@ from sqlalchemy.pool import NullPool
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:postgres@localhost:5432/budgeting_test"
 os.environ["JWT_SECRET"] = "test-secret"
 os.environ["PLAID_ENV"] = "sandbox"
 os.environ["PLAID_CLIENT_ID"] = "test-client"
 os.environ["PLAID_SECRET"] = "test-secret"
 os.environ["ANTHROPIC_API_KEY"] = "test-anthropic"
+os.environ["ENCRYPTION_KEY"] = "M0vWZpVH8YbHpJ8XAxXqB9ZBVbVT8oxTgPnFwQGCWNk="
 
 from app.database import Base, get_db
 from app.main import app

@@ -5,6 +5,7 @@ from sqlalchemy import String, Numeric, Boolean, Date, DateTime, ForeignKey, Uni
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
+from app.lib.crypto import EncryptedString
 
 
 class User(Base):
@@ -25,7 +26,7 @@ class Account(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    plaid_access_token: Mapped[str] = mapped_column(String, nullable=False)
+    plaid_access_token: Mapped[str] = mapped_column(EncryptedString(), nullable=False)
     plaid_item_id: Mapped[str] = mapped_column(String, nullable=False)
     institution_name: Mapped[str] = mapped_column(String, nullable=True)
     last_cursor: Mapped[str | None] = mapped_column(String, nullable=True)

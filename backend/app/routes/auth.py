@@ -2,11 +2,12 @@ import os
 import uuid
 from datetime import datetime, timedelta
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from jose import jwt
 from app.database import get_db
+from app.lib.rate_limit import limiter
 from app.middleware.auth import get_current_user
 from app.models import User, Account, Transaction, Budget
 from app.schemas import UserCreate, UserLogin, TokenOut, UserOut, PasswordChange
@@ -28,7 +29,8 @@ def create_token(user_id: uuid.UUID) -> str:
 
 
 @router.post("/register", response_model=TokenOut)
-async def register(body: UserCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register(request: Request, body: UserCreate, db: AsyncSession = Depends(get_db)):
     existing = await db.execute(select(User).where(User.email == body.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
@@ -41,7 +43,8 @@ async def register(body: UserCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenOut)
-async def login(body: UserLogin, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login(request: Request, body: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
     if not user or not verify_password(body.password, user.hashed_password):
