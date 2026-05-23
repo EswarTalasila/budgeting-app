@@ -2,8 +2,38 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword, exportData, deleteAccount } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Toast from '../components/Toast';
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  return (
+    <div className="inline-flex border border-zinc-200 dark:border-zinc-800 p-0.5">
+      {[
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+      ].map(({ value, label }) => {
+        const active = theme === value;
+        return (
+          <button
+            key={value}
+            onClick={() => {
+              if (!active) toggle();
+            }}
+            className={`px-3.5 h-7 text-[12px] font-medium transition-colors duration-100 ${
+              active
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+            }`}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function Section({ title, description, children }) {
   return (
@@ -96,6 +126,10 @@ export default function Settings() {
           </p>
           <p className="text-zinc-900 dark:text-zinc-100">{email || '—'}</p>
         </div>
+      </Section>
+
+      <Section title="Appearance" description="Choose your color theme.">
+        <ThemeToggle />
       </Section>
 
       <Section title="Change password" description="Use at least 6 characters.">
