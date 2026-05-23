@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getBudgets, createBudget, deleteBudget } from '../lib/api';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const CATEGORIES = [
   'Food & Dining',
@@ -24,6 +25,7 @@ function BudgetRow({ budget, onSaved, onDeleted }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(budget.monthly_limit));
   const [saving, setSaving] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   async function handleSave(e) {
     e?.preventDefault();
@@ -48,12 +50,22 @@ function BudgetRow({ budget, onSaved, onDeleted }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete the ${budget.category} budget for this month?`)) return;
     await deleteBudget(budget.id);
     onDeleted(budget.id);
+    setConfirmingDelete(false);
   }
 
   return (
+    <>
+    <ConfirmDialog
+      open={confirmingDelete}
+      title={`Delete ${budget.category} budget`}
+      description="This budget will be removed from the current month. Transactions are not affected."
+      confirmText="Delete budget"
+      variant="danger"
+      onConfirm={handleDelete}
+      onCancel={() => setConfirmingDelete(false)}
+    />
     <tr className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
       <td className="text-zinc-900 dark:text-zinc-100 font-medium">{budget.category}</td>
       <td className="text-right">
@@ -109,7 +121,7 @@ function BudgetRow({ budget, onSaved, onDeleted }) {
               Edit
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setConfirmingDelete(true)}
               className="text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-100"
             >
               Delete
@@ -118,6 +130,7 @@ function BudgetRow({ budget, onSaved, onDeleted }) {
         )}
       </td>
     </tr>
+    </>
   );
 }
 

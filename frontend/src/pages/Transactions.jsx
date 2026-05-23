@@ -7,6 +7,7 @@ import {
   updateTransactionNotes,
   setTransactionExcluded,
 } from '../lib/api';
+import Toast from '../components/Toast';
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -262,6 +263,7 @@ export default function Transactions() {
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
   const [expanded, setExpanded] = useState(null);
+  const [toast, setToast] = useState(null);
 
   async function handleSaveNotes(id, notes) {
     await updateTransactionNotes(id, notes);
@@ -278,7 +280,10 @@ export default function Transactions() {
       await deleteTransaction(id);
       refetch();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to delete');
+      setToast({
+        message: err.response?.data?.detail || 'Failed to delete',
+        type: 'error',
+      });
     }
   }
 
@@ -576,6 +581,8 @@ export default function Transactions() {
           )}
         </div>
       )}
+
+      <Toast message={toast?.message} type={toast?.type} onDismiss={() => setToast(null)} />
     </div>
   );
 }

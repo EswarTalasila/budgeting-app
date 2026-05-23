@@ -6,6 +6,7 @@ import {
   resetPlaidAccount,
 } from '../lib/api';
 import ConnectBank from '../components/ConnectBank';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Accounts() {
   const [accounts, setAccounts] = useState([]);
@@ -13,6 +14,8 @@ export default function Accounts() {
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [disconnectTarget, setDisconnectTarget] = useState(null);
+  const [resetTarget, setResetTarget] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -43,19 +46,20 @@ export default function Accounts() {
     }
   }
 
-  async function handleDisconnect(id) {
-    if (!confirm('Disconnect this bank? All synced transactions will be deleted.')) return;
-    await deletePlaidAccount(id);
+  async function handleDisconnect() {
+    await deletePlaidAccount(disconnectTarget.id);
+    setDisconnectTarget(null);
     load();
   }
 
-  async function handleReset(id) {
-    if (!confirm('Reset cursor and re-pull every transaction from this bank? Existing transactions stay; missing ones get re-added.')) return;
+  async function handleReset() {
+    const target = resetTarget;
+    setResetTarget(null);
     setSyncing(true);
     setMessage(null);
     setError(null);
     try {
-      await resetPlaidAccount(id);
+      await resetPlaidAccount(target.id);
       const result = await syncPlaidTransactions();
       setMessage(`Re-synced: ${result.added} added, ${result.modified} updated.`);
       load();
@@ -130,14 +134,14 @@ export default function Accounts() {
                     <td className="text-right">
                       <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
                         <button
-                          onClick={() => handleReset(a.id)}
+                          onClick={() => setResetTarget(a)}
                           className="text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-100"
                           title="Clear sync cursor and re-pull all transactions"
                         >
                           Reset
                         </button>
                         <button
-                          onClick={() => handleDisconnect(a.id)}
+                          onClick={() => setDisconnectTarget(a)}
                           className="text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-100"
                         >
                           Disconnect
@@ -151,6 +155,25 @@ export default function Accounts() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!disconnectTarget}
+        title={`Disconnect ${disconnectTarget?.institution_name || 'this bank'}?`}
+        description="All transactions synced from this bank will be permanently deleted. You can reconnect later."
+        confirmText="Disconnect bank"
+        variant="danger"
+        onConfirm={handleDisconnect}
+        onCancel={() => setDisconnectTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!resetTarget}
+        title={`Reset ${resetTarget?.institution_name || 'this bank'}?`}
+        description="Clears the sync cursor and re-pulls every available transaction from Plaid. Existing transactions are preserved; previously missing ones get added back."
+        confirmText="Reset and re-sync"
+        onConfirm={handleReset}
+        onCancel={() => setResetTarget(null)}
+      />
     </div>
   );
 }

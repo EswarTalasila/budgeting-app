@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword, exportData, deleteAccount } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import ConfirmDialog from '../components/ConfirmDialog';
+import Toast from '../components/Toast';
 
 function Section({ title, description, children }) {
   return (
@@ -27,7 +29,8 @@ export default function Settings() {
   const [pwdErr, setPwdErr] = useState(null);
 
   const [exporting, setExporting] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [toast, setToast] = useState(null);
 
   async function handleChangePassword(e) {
     e.preventDefault();
@@ -70,19 +73,9 @@ export default function Settings() {
   }
 
   async function handleDeleteAccount() {
-    const confirmation = prompt(
-      'This will permanently delete your account, transactions, budgets, and bank connections. Type DELETE to confirm.'
-    );
-    if (confirmation !== 'DELETE') return;
-    setDeleting(true);
-    try {
-      await deleteAccount();
-      clearToken();
-      navigate('/login');
-    } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to delete account');
-      setDeleting(false);
-    }
+    await deleteAccount();
+    clearToken();
+    navigate('/login');
   }
 
   return (
@@ -166,13 +159,25 @@ export default function Settings() {
         description="Deleting your account is permanent and cannot be undone."
       >
         <button
-          onClick={handleDeleteAccount}
-          disabled={deleting}
+          onClick={() => setConfirmingDelete(true)}
           className="inline-flex items-center justify-center gap-1.5 h-9 px-3.5 text-[13px] font-medium border border-red-300 dark:border-red-900 bg-white dark:bg-zinc-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-100"
         >
-          {deleting ? 'Deleting…' : 'Delete account'}
+          Delete account
         </button>
       </Section>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete your Clover account?"
+        description="This permanently deletes your account, transactions, budgets, and bank connections. You'll be signed out. This cannot be undone."
+        confirmText="Delete forever"
+        variant="danger"
+        confirmInput="DELETE"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setConfirmingDelete(false)}
+      />
+
+      <Toast message={toast?.message} type={toast?.type} onDismiss={() => setToast(null)} />
     </div>
   );
 }
