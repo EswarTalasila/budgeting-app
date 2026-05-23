@@ -11,6 +11,12 @@
     text-rendering: optimizeLegibility;
   }
 
+  html,
+  body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+  }
+
   body {
     @apply bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased;
     font-size: 14px;

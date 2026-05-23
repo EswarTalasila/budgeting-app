@@ -179,15 +179,15 @@ export default function Layout({ children }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-[260px] md:relative md:w-[220px] bg-zinc-50/95 dark:bg-zinc-950/95 md:bg-zinc-50/60 md:dark:bg-zinc-900/40 backdrop-blur md:backdrop-blur-none border-r border-zinc-200 dark:border-zinc-800 flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-[260px] md:relative md:w-[220px] bg-zinc-50/95 dark:bg-zinc-950/95 md:bg-zinc-50/60 md:dark:bg-zinc-900/40 backdrop-blur md:backdrop-blur-none border-r border-zinc-200 dark:border-zinc-800 flex flex-col transition-transform duration-200 ease-out pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <Sidebar onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className="h-14 px-4 md:px-8 flex items-center justify-between md:justify-end border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0 pb-[env(safe-area-inset-bottom)]">
+        <header className="h-14 px-4 md:px-8 flex items-center justify-between md:justify-end border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0 mt-[env(safe-area-inset-top)]">
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden inline-flex items-center justify-center w-9 h-9 -ml-1.5 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100"
