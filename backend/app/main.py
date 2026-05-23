@@ -7,16 +7,18 @@ from app.lib.rate_limit import limiter
 from app.routes import auth, transactions, budgets, plaid
 
 
+DEV_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "capacitor://localhost",
+    "http://100.83.62.115:5173",
+]
+
+
 def get_allowed_origins() -> list[str]:
-    raw = os.getenv("ALLOWED_ORIGINS")
-    if not raw:
-        return [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "capacitor://localhost",
-            "http://100.83.62.115:5173",
-        ]
-    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    raw = os.getenv("ALLOWED_ORIGINS", "")
+    configured = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return list(dict.fromkeys(configured + DEV_ORIGINS))
 
 
 app = FastAPI(title="Clover API")
