@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Accounts from './pages/Accounts';
+import Subscriptions from './pages/Subscriptions';
 import Login from './pages/Login';
 
 function ProtectedRoutes() {
@@ -17,6 +18,7 @@ function ProtectedRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/budgets" element={<Budgets />} />
+        <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/accounts" element={<Accounts />} />
       </Routes>
     </Layout>

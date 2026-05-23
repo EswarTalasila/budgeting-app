@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getPlaidAccounts, deletePlaidAccount, syncPlaidTransactions } from '../lib/api';
+import {
+  getPlaidAccounts,
+  deletePlaidAccount,
+  syncPlaidTransactions,
+  resetPlaidAccount,
+} from '../lib/api';
 import ConnectBank from '../components/ConnectBank';
 
 export default function Accounts() {
@@ -42,6 +47,23 @@ export default function Accounts() {
     if (!confirm('Disconnect this bank? All synced transactions will be deleted.')) return;
     await deletePlaidAccount(id);
     load();
+  }
+
+  async function handleReset(id) {
+    if (!confirm('Reset cursor and re-pull every transaction from this bank? Existing transactions stay; missing ones get re-added.')) return;
+    setSyncing(true);
+    setMessage(null);
+    setError(null);
+    try {
+      await resetPlaidAccount(id);
+      const result = await syncPlaidTransactions();
+      setMessage(`Re-synced: ${result.added} added, ${result.modified} updated.`);
+      load();
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to reset');
+    } finally {
+      setSyncing(false);
+    }
   }
 
   return (
@@ -106,12 +128,21 @@ export default function Accounts() {
                       {a.last_cursor ? 'Synced' : 'Awaiting first sync'}
                     </td>
                     <td className="text-right">
-                      <button
-                        onClick={() => handleDisconnect(a.id)}
-                        className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
-                      >
-                        Disconnect
-                      </button>
+                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+                        <button
+                          onClick={() => handleReset(a.id)}
+                          className="text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-100"
+                          title="Clear sync cursor and re-pull all transactions"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          onClick={() => handleDisconnect(a.id)}
+                          className="text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-100"
+                        >
+                          Disconnect
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

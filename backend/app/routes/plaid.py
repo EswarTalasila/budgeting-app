@@ -68,6 +68,47 @@ async def list_accounts(
     return result.scalars().all()
 
 
+@router.post("/accounts/{account_id}/reset", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_account_cursor(
+    account_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Account).where(Account.id == account_id, Account.user_id == user_id)
+    )
+    account = result.scalar_one_or_none()
+    if not account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    account.last_cursor = None
+    await db.commit()
+
+
+@router.get("/recurring")
+async def list_recurring(
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(select(Account).where(Account.user_id == user_id))
+    accounts = result.scalars().all()
+
+    all_outflow = []
+    all_inflow = []
+    for account in accounts:
+        try:
+            data = await plaid_lib.get_recurring(account.plaid_access_token)
+        except Exception:
+            continue
+        for s in data["outflow_streams"]:
+            s["institution_name"] = account.institution_name
+            all_outflow.append(s)
+        for s in data["inflow_streams"]:
+            s["institution_name"] = account.institution_name
+            all_inflow.append(s)
+
+    return {"outflow_streams": all_outflow, "inflow_streams": all_inflow}
+
+
 @router.delete("/accounts/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_account(
     account_id: uuid.UUID,

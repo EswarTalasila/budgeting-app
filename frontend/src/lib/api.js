@@ -89,3 +89,11 @@ export function getPlaidAccounts() {
 export function deletePlaidAccount(id) {
   return api.delete(`/plaid/accounts/${id}`);
 }
+
+export function resetPlaidAccount(id) {
+  return api.post(`/plaid/accounts/${id}/reset`);
+}
+
+export function getRecurring() {
+  return api.get('/plaid/recurring').then((r) => r.data);
+}
