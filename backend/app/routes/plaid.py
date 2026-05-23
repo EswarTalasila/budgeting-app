@@ -146,6 +146,9 @@ async def sync_transactions(
 
                 loc = t.get("location") or {}
                 pfc = t.get("personal_finance_category") or {}
+                authorized = t.get("authorized_date")
+                if isinstance(authorized, str):
+                    authorized = date.fromisoformat(authorized)
                 tx = Transaction(
                     user_id=user_id,
                     account_id=account.id,
@@ -153,6 +156,10 @@ async def sync_transactions(
                     amount=Decimal(str(t.get("amount", 0))),
                     description=t.get("name") or t.get("merchant_name") or "Unknown",
                     merchant_name=t.get("merchant_name"),
+                    merchant_website=t.get("website"),
+                    merchant_logo_url=t.get("logo_url"),
+                    iso_currency_code=t.get("iso_currency_code"),
+                    authorized_date=authorized,
                     category=await categorize_with_fallback(t),
                     category_detailed=pfc.get("detailed") if isinstance(pfc, dict) else None,
                     payment_channel=t.get("payment_channel"),
@@ -174,9 +181,16 @@ async def sync_transactions(
                 if tx:
                     loc = t.get("location") or {}
                     pfc = t.get("personal_finance_category") or {}
+                    authorized = t.get("authorized_date")
+                    if isinstance(authorized, str):
+                        authorized = date.fromisoformat(authorized)
                     tx.amount = Decimal(str(t.get("amount", 0)))
                     tx.description = t.get("name") or t.get("merchant_name") or tx.description
                     tx.merchant_name = t.get("merchant_name") or tx.merchant_name
+                    tx.merchant_website = t.get("website") or tx.merchant_website
+                    tx.merchant_logo_url = t.get("logo_url") or tx.merchant_logo_url
+                    tx.iso_currency_code = t.get("iso_currency_code") or tx.iso_currency_code
+                    tx.authorized_date = authorized or tx.authorized_date
                     tx.category = await categorize_with_fallback(t)
                     tx.category_detailed = pfc.get("detailed") if isinstance(pfc, dict) else tx.category_detailed
                     tx.payment_channel = t.get("payment_channel") or tx.payment_channel

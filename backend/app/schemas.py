@@ -44,6 +44,10 @@ class TransactionOut(BaseModel):
     amount: Decimal
     description: str
     merchant_name: str | None = None
+    merchant_website: str | None = None
+    merchant_logo_url: str | None = None
+    iso_currency_code: str | None = None
+    authorized_date: date | None = None
     category: str | None
     category_detailed: str | None = None
     payment_channel: str | None = None
