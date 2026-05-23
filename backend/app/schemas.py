@@ -26,6 +26,11 @@ class TokenOut(BaseModel):
     token_type: str = "bearer"
 
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class TransactionCreate(BaseModel):
     amount: Decimal
     description: str

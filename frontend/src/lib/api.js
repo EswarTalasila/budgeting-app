@@ -56,6 +56,10 @@ export function createBudget(data) {
   return api.post('/budgets', data).then((r) => r.data);
 }
 
+export function deleteBudget(id) {
+  return api.delete(`/budgets/${id}`);
+}
+
 export function register(data) {
   return api.post('/auth/register', data).then((r) => r.data);
 }
@@ -66,6 +70,18 @@ export function login(data) {
 
 export function getMe() {
   return api.get('/auth/me').then((r) => r.data);
+}
+
+export function changePassword(current_password, new_password) {
+  return api.patch('/auth/password', { current_password, new_password });
+}
+
+export function exportData() {
+  return api.get('/auth/export').then((r) => r.data);
+}
+
+export function deleteAccount() {
+  return api.delete('/auth/me');
 }
 
 export function createPlaidLinkToken() {

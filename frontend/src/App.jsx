@@ -7,6 +7,7 @@ import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Accounts from './pages/Accounts';
 import Subscriptions from './pages/Subscriptions';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 
 function ProtectedRoutes() {
@@ -20,6 +21,7 @@ function ProtectedRoutes() {
         <Route path="/budgets" element={<Budgets />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/accounts" element={<Accounts />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getBudgets, createBudget } from '../lib/api';
+import { useState, useEffect, useCallback } from 'react';
+import { getBudgets, createBudget, deleteBudget } from '../lib/api';
 
 const CATEGORIES = [
   'Food & Dining',
@@ -20,6 +20,99 @@ function fmt(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(n));
 }
 
+function BudgetRow({ budget, onSaved, onDeleted }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(String(budget.monthly_limit));
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave(e) {
+    e?.preventDefault();
+    const limit = parseFloat(value);
+    if (isNaN(limit) || limit < 0) return;
+    if (limit === Number(budget.monthly_limit)) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    try {
+      const updated = await createBudget({
+        category: budget.category,
+        monthly_limit: limit,
+        month: budget.month,
+      });
+      onSaved(updated);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm(`Delete the ${budget.category} budget for this month?`)) return;
+    await deleteBudget(budget.id);
+    onDeleted(budget.id);
+  }
+
+  return (
+    <tr className="group hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
+      <td className="text-zinc-900 dark:text-zinc-100 font-medium">{budget.category}</td>
+      <td className="text-right">
+        {editing ? (
+          <form onSubmit={handleSave} className="flex items-center justify-end gap-1.5">
+            <div className="relative">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400 text-[12px]">$</span>
+              <input
+                autoFocus
+                type="number"
+                step="0.01"
+                min="0"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && setEditing(false)}
+                className="h-7 pl-5 pr-2 w-28 text-[13px] text-right tabular-nums bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100 focus:ring-0 text-zinc-900 dark:text-zinc-100"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={saving}
+              className="h-7 px-2 text-[12px] font-medium bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border border-zinc-900 dark:border-zinc-100 hover:bg-zinc-800 dark:hover:bg-white"
+            >
+              {saving ? '…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(false);
+                setValue(String(budget.monthly_limit));
+              }}
+              className="h-7 px-2 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+            >
+              Cancel
+            </button>
+          </form>
+        ) : (
+          <button
+            onClick={() => setEditing(true)}
+            className="text-zinc-900 dark:text-zinc-100 font-semibold tabular-nums hover:underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700"
+          >
+            {fmt(budget.monthly_limit)}
+          </button>
+        )}
+      </td>
+      <td className="text-right w-[80px]">
+        {!editing && (
+          <button
+            onClick={handleDelete}
+            className="text-[12px] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover:opacity-100 hover:text-red-600 dark:hover:text-red-400 transition-all duration-100"
+          >
+            Delete
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+}
+
 export default function Budgets() {
   const [month, setMonth] = useState(currentMonth());
   const [budgets, setBudgets] = useState([]);
@@ -28,9 +121,13 @@ export default function Budgets() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     getBudgets(month).then(setBudgets).catch(() => setBudgets([]));
   }, [month]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -59,6 +156,14 @@ export default function Budgets() {
     }
   }
 
+  function handleRowSaved(updated) {
+    setBudgets((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+  }
+
+  function handleRowDeleted(id) {
+    setBudgets((prev) => prev.filter((b) => b.id !== id));
+  }
+
   const total = budgets.reduce((acc, b) => acc + Number(b.monthly_limit), 0);
 
   return (
@@ -84,10 +189,10 @@ export default function Budgets() {
         <div className="lg:col-span-2">
           <div className="panel p-5">
             <h2 className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              Set a budget
+              Add or update a budget
             </h2>
             <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5 mb-5">
-              Save again to update an existing category.
+              You can also edit or delete existing budgets in the table.
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -155,16 +260,17 @@ export default function Budgets() {
                   <tr>
                     <th>Category</th>
                     <th className="text-right">Monthly limit</th>
+                    <th className="w-[80px]" />
                   </tr>
                 </thead>
                 <tbody>
                   {budgets.map((b) => (
-                    <tr key={b.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors duration-100">
-                      <td className="text-zinc-900 dark:text-zinc-100 font-medium">{b.category}</td>
-                      <td className="text-right text-zinc-900 dark:text-zinc-100 font-semibold tabular-nums">
-                        {fmt(b.monthly_limit)}
-                      </td>
-                    </tr>
+                    <BudgetRow
+                      key={b.id}
+                      budget={b}
+                      onSaved={handleRowSaved}
+                      onDeleted={handleRowDeleted}
+                    />
                   ))}
                 </tbody>
               </table>

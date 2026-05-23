@@ -26,6 +26,23 @@ async def list_budgets(
     return result.scalars().all()
 
 
+@router.delete("/{budget_id}", status_code=204)
+async def delete_budget(
+    budget_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Budget).where(Budget.id == budget_id, Budget.user_id == user_id)
+    )
+    budget = result.scalar_one_or_none()
+    if not budget:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Budget not found")
+    await db.delete(budget)
+    await db.commit()
+
+
 @router.post("/", response_model=BudgetOut)
 async def upsert_budget(
     body: BudgetCreate,
