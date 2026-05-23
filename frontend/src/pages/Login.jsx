@@ -44,6 +44,7 @@ export default function Login() {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const { saveToken } = useAuth();
@@ -51,6 +52,10 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (mode === 'register' && password !== confirmPassword) {
+      setError({ message: "Passwords don't match." });
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -69,6 +74,7 @@ export default function Login() {
     setMode(next);
     setError(null);
     setPassword('');
+    setConfirmPassword('');
   }
 
   return (
@@ -116,6 +122,27 @@ export default function Login() {
             )}
           </div>
 
+          {mode === 'register' && (
+            <div>
+              <label className="label">Confirm password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="input"
+                placeholder="••••••••"
+                autoComplete="new-password"
+              />
+              {confirmPassword && confirmPassword !== password && (
+                <p className="text-[11px] text-red-600 dark:text-red-400 mt-1.5">
+                  Passwords don't match.
+                </p>
+              )}
+            </div>
+          )}
+
           {error && (
             <div className="text-[13px] text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-3 py-2">
               <p>{error.message}</p>
@@ -131,7 +158,11 @@ export default function Login() {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full">
+          <button
+            type="submit"
+            disabled={loading || (mode === 'register' && password !== confirmPassword)}
+            className="btn-primary w-full"
+          >
             {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
