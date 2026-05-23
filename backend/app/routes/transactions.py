@@ -38,7 +38,7 @@ def to_out(tx: Transaction) -> TransactionOut:
 router = APIRouter()
 
 
-@router.get("/", response_model=list[TransactionOut])
+@router.get("", response_model=list[TransactionOut])
 async def list_transactions(
     month: str | None = None,
     db: AsyncSession = Depends(get_db),
@@ -62,7 +62,7 @@ async def list_transactions(
     return [to_out(tx) for tx in result.scalars().all()]
 
 
-@router.post("/", response_model=TransactionOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TransactionOut, status_code=status.HTTP_201_CREATED)
 async def create_transaction(
     body: TransactionCreate,
     db: AsyncSession = Depends(get_db),

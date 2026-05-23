@@ -27,7 +27,7 @@ async def make_tx(db_session, email, **kwargs):
 
 async def test_create_manual_transaction(client, headers):
     resp = await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "12.50", "description": "Coffee", "date": "2026-05-01"},
     )
@@ -40,7 +40,7 @@ async def test_create_manual_transaction(client, headers):
 
 async def test_create_transaction_uses_provided_category(client, headers):
     resp = await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "12.50", "description": "Gas", "category": "Transportation", "date": "2026-05-01"},
     )
@@ -50,11 +50,11 @@ async def test_create_transaction_uses_provided_category(client, headers):
 async def test_list_filter_handles_december(client, headers):
     for d in ["2026-11-15", "2026-12-15", "2027-01-15"]:
         await client.post(
-            "/api/transactions/",
+            "/api/transactions",
             headers=headers,
             json={"amount": "5", "description": "Test", "date": d},
         )
-    resp = await client.get("/api/transactions/?month=2026-12", headers=headers)
+    resp = await client.get("/api/transactions?month=2026-12", headers=headers)
     assert resp.status_code == 200
     dates = [t["date"] for t in resp.json()]
     assert dates == ["2026-12-15"]
@@ -63,12 +63,12 @@ async def test_list_filter_handles_december(client, headers):
 async def test_list_filters_by_month(client, headers, db_session):
     for d in ["2026-04-15", "2026-05-01", "2026-05-20"]:
         await client.post(
-            "/api/transactions/",
+            "/api/transactions",
             headers=headers,
             json={"amount": "5", "description": "Test", "date": d},
         )
 
-    resp = await client.get("/api/transactions/?month=2026-05", headers=headers)
+    resp = await client.get("/api/transactions?month=2026-05", headers=headers)
     assert resp.status_code == 200
     dates = [t["date"] for t in resp.json()]
     assert all(d.startswith("2026-05") for d in dates)
@@ -77,7 +77,7 @@ async def test_list_filters_by_month(client, headers, db_session):
 
 async def test_list_only_returns_users_own_transactions(client, headers, db_session):
     await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "5", "description": "Mine", "date": "2026-05-01"},
     )
@@ -88,12 +88,12 @@ async def test_list_only_returns_users_own_transactions(client, headers, db_sess
     )
     other_headers = {"Authorization": f"Bearer {other.json()['access_token']}"}
     await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=other_headers,
         json={"amount": "99", "description": "Theirs", "date": "2026-05-01"},
     )
 
-    mine = await client.get("/api/transactions/", headers=headers)
+    mine = await client.get("/api/transactions", headers=headers)
     descriptions = [t["description"] for t in mine.json()]
     assert "Mine" in descriptions
     assert "Theirs" not in descriptions
@@ -101,7 +101,7 @@ async def test_list_only_returns_users_own_transactions(client, headers, db_sess
 
 async def test_patch_updates_notes_and_category(client, headers):
     created = await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "5", "description": "Test", "date": "2026-05-01"},
     )
@@ -119,7 +119,7 @@ async def test_patch_updates_notes_and_category(client, headers):
 
 async def test_patch_excludes_transaction(client, headers):
     created = await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "5", "description": "Test", "date": "2026-05-01"},
     )
@@ -135,7 +135,7 @@ async def test_patch_excludes_transaction(client, headers):
 
 async def test_delete_manual_transaction_works(client, headers):
     created = await client.post(
-        "/api/transactions/",
+        "/api/transactions",
         headers=headers,
         json={"amount": "5", "description": "Test", "date": "2026-05-01"},
     )
@@ -165,5 +165,5 @@ async def test_recategorize_calls_claude_for_other(client, headers, db_session):
 
 
 async def test_transactions_require_auth(client):
-    resp = await client.get("/api/transactions/")
+    resp = await client.get("/api/transactions")
     assert resp.status_code == 403

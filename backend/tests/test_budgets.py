@@ -22,7 +22,7 @@ async def add_tx(db_session, email, category, amount, on_date, **kwargs):
 
 async def test_create_budget(client, headers):
     resp = await client.post(
-        "/api/budgets/",
+        "/api/budgets",
         headers=headers,
         json={"category": "Food & Dining", "monthly_limit": "300", "month": "2026-05"},
     )
@@ -32,10 +32,10 @@ async def test_create_budget(client, headers):
 
 async def test_upsert_updates_existing_budget(client, headers):
     payload = {"category": "Food & Dining", "monthly_limit": "300", "month": "2026-05"}
-    first = await client.post("/api/budgets/", headers=headers, json=payload)
+    first = await client.post("/api/budgets", headers=headers, json=payload)
 
     payload["monthly_limit"] = "450"
-    second = await client.post("/api/budgets/", headers=headers, json=payload)
+    second = await client.post("/api/budgets", headers=headers, json=payload)
 
     assert first.json()["id"] == second.json()["id"]
     assert second.json()["monthly_limit"] == "450.00"
@@ -43,17 +43,17 @@ async def test_upsert_updates_existing_budget(client, headers):
 
 async def test_list_filters_by_month(client, headers):
     await client.post(
-        "/api/budgets/",
+        "/api/budgets",
         headers=headers,
         json={"category": "Food & Dining", "monthly_limit": "300", "month": "2026-05"},
     )
     await client.post(
-        "/api/budgets/",
+        "/api/budgets",
         headers=headers,
         json={"category": "Shopping", "monthly_limit": "100", "month": "2026-04"},
     )
 
-    may = await client.get("/api/budgets/?month=2026-05", headers=headers)
+    may = await client.get("/api/budgets?month=2026-05", headers=headers)
     assert len(may.json()) == 1
     assert may.json()[0]["category"] == "Food & Dining"
 
@@ -61,7 +61,7 @@ async def test_list_filters_by_month(client, headers):
 async def test_summary_includes_categories_without_budgets(client, headers, db_session):
     await add_tx(db_session, "test@example.com", "Shopping", 50, date(2026, 5, 10))
     await client.post(
-        "/api/budgets/",
+        "/api/budgets",
         headers=headers,
         json={"category": "Food & Dining", "monthly_limit": "300", "month": "2026-05"},
     )
@@ -100,5 +100,5 @@ async def test_trend_returns_requested_months(client, headers):
 
 
 async def test_budgets_require_auth(client):
-    resp = await client.get("/api/budgets/?month=2026-05")
+    resp = await client.get("/api/budgets?month=2026-05")
     assert resp.status_code == 403

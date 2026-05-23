@@ -14,7 +14,7 @@ from app.schemas import BudgetCreate, BudgetOut, BudgetSummaryItem
 router = APIRouter()
 
 
-@router.get("/", response_model=list[BudgetOut])
+@router.get("", response_model=list[BudgetOut])
 async def list_budgets(
     month: str,
     db: AsyncSession = Depends(get_db),
@@ -43,7 +43,7 @@ async def delete_budget(
     await db.commit()
 
 
-@router.post("/", response_model=BudgetOut)
+@router.post("", response_model=BudgetOut)
 async def upsert_budget(
     body: BudgetCreate,
     db: AsyncSession = Depends(get_db),
