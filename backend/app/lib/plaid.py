@@ -1,11 +1,11 @@
 import os
+import httpx
 import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
-from plaid.model.transactions_recurring_get_request import TransactionsRecurringGetRequest
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
@@ -14,6 +14,12 @@ _env_map = {
     "sandbox": plaid.Environment.Sandbox,
     "production": plaid.Environment.Production,
 }
+
+_host_map = {
+    "sandbox": "https://sandbox.plaid.com",
+    "production": "https://production.plaid.com",
+}
+PLAID_HOST = _host_map.get(os.getenv("PLAID_ENV", "sandbox"))
 
 configuration = plaid.Configuration(
     host=_env_map.get(os.getenv("PLAID_ENV", "sandbox")),
@@ -53,14 +59,19 @@ async def get_account_ids(access_token: str) -> list[str]:
 
 async def get_recurring(access_token: str) -> dict:
     account_ids = await get_account_ids(access_token)
-    request = TransactionsRecurringGetRequest(
-        access_token=access_token,
-        account_ids=account_ids,
-    )
-    response = client.transactions_recurring_get(request)
+    payload = {
+        "client_id": os.getenv("PLAID_CLIENT_ID"),
+        "secret": os.getenv("PLAID_SECRET"),
+        "access_token": access_token,
+        "account_ids": account_ids,
+    }
+    async with httpx.AsyncClient(timeout=30) as http:
+        resp = await http.post(f"{PLAID_HOST}/transactions/recurring/get", json=payload)
+        resp.raise_for_status()
+        data = resp.json()
     return {
-        "inflow_streams": [s.to_dict() for s in response["inflow_streams"]],
-        "outflow_streams": [s.to_dict() for s in response["outflow_streams"]],
+        "inflow_streams": data.get("inflow_streams", []),
+        "outflow_streams": data.get("outflow_streams", []),
     }
 
 
