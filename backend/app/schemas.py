@@ -112,3 +112,54 @@ class PlaidSyncResponse(BaseModel):
     added: int
     modified: int
     removed: int
+
+
+class AccountBalance(BaseModel):
+    institution: str | None
+    name: str
+    type: str
+    subtype: str | None
+    mask: str | None
+    current: Decimal | None
+    available: Decimal | None
+    currency: str | None
+
+
+class NetWorthResponse(BaseModel):
+    assets: Decimal
+    liabilities: Decimal
+    net_worth: Decimal
+    accounts: list[AccountBalance]
+
+
+class TopMerchant(BaseModel):
+    merchant: str
+    spent: Decimal
+    transaction_count: int
+
+
+class GoalCreate(BaseModel):
+    name: str
+    target_amount: Decimal
+    current_amount: Decimal = Decimal("0")
+    target_date: date | None = None
+    note: str | None = None
+
+
+class GoalUpdate(BaseModel):
+    name: str | None = None
+    target_amount: Decimal | None = None
+    current_amount: Decimal | None = None
+    target_date: date | None = None
+    note: str | None = None
+
+
+class GoalOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    target_amount: Decimal
+    current_amount: Decimal
+    target_date: date | None
+    note: str | None
+
+    model_config = {"from_attributes": True}

@@ -7,6 +7,7 @@ import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Accounts from './pages/Accounts';
 import Subscriptions from './pages/Subscriptions';
+import Goals from './pages/Goals';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 
@@ -20,6 +21,7 @@ function ProtectedRoutes() {
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/budgets" element={<Budgets />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
+        <Route path="/goals" element={<Goals />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>

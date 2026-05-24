@@ -167,3 +167,33 @@ async def test_recategorize_calls_claude_for_other(client, headers, db_session):
 async def test_transactions_require_auth(client):
     resp = await client.get("/api/transactions")
     assert resp.status_code == 403
+
+
+async def test_top_merchants_aggregates_and_orders(client, headers, db_session):
+    await make_tx(db_session, "test@example.com", merchant_name="Starbucks", amount=5)
+    await make_tx(db_session, "test@example.com", merchant_name="Starbucks", amount=7)
+    await make_tx(db_session, "test@example.com", merchant_name="Amazon", amount=50)
+    await make_tx(db_session, "test@example.com", merchant_name="REI", amount=100)
+    await make_tx(db_session, "test@example.com", merchant_name="REI", amount=999, excluded=True)
+    await make_tx(db_session, "test@example.com", merchant_name="Employer", amount=2000, category="Income")
+
+    resp = await client.get("/api/transactions/top-merchants?limit=3", headers=headers)
+    assert resp.status_code == 200
+    merchants = resp.json()
+    assert merchants[0]["merchant"] == "REI"
+    assert merchants[0]["spent"] == "100.00"
+    assert merchants[1]["merchant"] == "Amazon"
+    assert merchants[2]["merchant"] == "Starbucks"
+    assert merchants[2]["spent"] == "12.00"
+    assert merchants[2]["transaction_count"] == 2
+
+
+async def test_top_merchants_filters_by_month(client, headers, db_session):
+    await make_tx(db_session, "test@example.com", merchant_name="MayBuy", amount=20, date=date(2026, 5, 10))
+    await make_tx(db_session, "test@example.com", merchant_name="AprilBuy", amount=30, date=date(2026, 4, 10))
+
+    resp = await client.get("/api/transactions/top-merchants?month=2026-05", headers=headers)
+    assert resp.status_code == 200
+    merchants = [m["merchant"] for m in resp.json()]
+    assert "MayBuy" in merchants
+    assert "AprilBuy" not in merchants

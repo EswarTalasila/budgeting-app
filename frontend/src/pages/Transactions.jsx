@@ -315,6 +315,7 @@ export default function Transactions() {
   const [sortDir, setSortDir] = useState('desc');
   const [expanded, setExpanded] = useState(null);
   const [toast, setToast] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   async function handleSaveNotes(id, notes) {
     await updateTransactionNotes(id, notes);
@@ -339,9 +340,19 @@ export default function Transactions() {
   }
 
   const sorted = useMemo(() => {
-    const copy = categoryFilter
+    let copy = categoryFilter
       ? transactions.filter((t) => t.category === categoryFilter)
       : [...transactions];
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      copy = copy.filter((t) => {
+        const haystack = [t.description, t.merchant_name, t.notes, t.location_city]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(query);
+      });
+    }
     copy.sort((a, b) => {
       let av, bv;
       if (sortKey === 'date') {
@@ -362,7 +373,7 @@ export default function Transactions() {
       return 0;
     });
     return copy;
-  }, [transactions, sortKey, sortDir, categoryFilter]);
+  }, [transactions, sortKey, sortDir, categoryFilter, searchQuery]);
 
   function toggleSort(key) {
     if (sortKey === key) {
@@ -437,6 +448,37 @@ export default function Transactions() {
           <button onClick={() => setShowForm((v) => !v)} className="btn-primary">
             {showForm ? 'Cancel' : 'New transaction'}
           </button>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <div className="relative">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-[14px] h-[14px] text-zinc-400 dark:text-zinc-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.75}
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search description, merchant, notes…"
+            className="input pl-9"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 px-1.5"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

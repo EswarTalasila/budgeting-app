@@ -13,6 +13,8 @@ from app.schemas import (
     PlaidExchangeRequest,
     AccountOut,
     PlaidSyncResponse,
+    AccountBalance,
+    NetWorthResponse,
 )
 from app.lib import plaid as plaid_lib
 from app.lib.claude import categorize_transaction
@@ -67,6 +69,66 @@ async def list_accounts(
 ):
     result = await db.execute(select(Account).where(Account.user_id == user_id))
     return result.scalars().all()
+
+
+ASSET_TYPES = {"depository", "investment", "brokerage"}
+LIABILITY_TYPES = {"credit", "loan"}
+
+
+@router.get("/balances", response_model=NetWorthResponse)
+async def get_net_worth(
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    result = await db.execute(select(Account).where(Account.user_id == user_id))
+    accounts = result.scalars().all()
+
+    balances: list[AccountBalance] = []
+    assets = Decimal("0")
+    liabilities = Decimal("0")
+
+    for account in accounts:
+        try:
+            plaid_accounts = await plaid_lib.get_accounts(account.plaid_access_token)
+        except Exception:
+            continue
+        for pa in plaid_accounts:
+            balance_data = pa.get("balances") or {}
+            current = balance_data.get("current")
+            available = balance_data.get("available")
+            account_type = pa.get("type", "")
+            account_type_str = account_type if isinstance(account_type, str) else str(account_type)
+            subtype = pa.get("subtype")
+            subtype_str = subtype if isinstance(subtype, str) or subtype is None else str(subtype)
+
+            current_dec = Decimal(str(current)) if current is not None else None
+            available_dec = Decimal(str(available)) if available is not None else None
+
+            if current_dec is not None:
+                if account_type_str in ASSET_TYPES:
+                    assets += current_dec
+                elif account_type_str in LIABILITY_TYPES:
+                    liabilities += current_dec
+
+            balances.append(
+                AccountBalance(
+                    institution=account.institution_name,
+                    name=pa.get("name", "Account"),
+                    type=account_type_str,
+                    subtype=subtype_str,
+                    mask=pa.get("mask"),
+                    current=current_dec,
+                    available=available_dec,
+                    currency=balance_data.get("iso_currency_code") or balance_data.get("unofficial_currency_code"),
+                )
+            )
+
+    return NetWorthResponse(
+        assets=assets,
+        liabilities=liabilities,
+        net_worth=assets - liabilities,
+        accounts=balances,
+    )
 
 
 @router.post("/accounts/{account_id}/reset", status_code=status.HTTP_204_NO_CONTENT)

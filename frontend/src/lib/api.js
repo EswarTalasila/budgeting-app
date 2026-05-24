@@ -120,3 +120,27 @@ export function resetPlaidAccount(id) {
 export function getRecurring() {
   return api.get('/plaid/recurring').then((r) => r.data);
 }
+
+export function getNetWorth() {
+  return api.get('/plaid/balances').then((r) => r.data);
+}
+
+export function getTopMerchants(month, limit = 5) {
+  return api.get('/transactions/top-merchants', { params: { month, limit } }).then((r) => r.data);
+}
+
+export function getGoals() {
+  return api.get('/goals').then((r) => r.data);
+}
+
+export function createGoal(data) {
+  return api.post('/goals', data).then((r) => r.data);
+}
+
+export function updateGoal(id, data) {
+  return api.patch(`/goals/${id}`, data).then((r) => r.data);
+}
+
+export function deleteGoal(id) {
+  return api.delete(`/goals/${id}`);
+}

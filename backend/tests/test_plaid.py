@@ -72,6 +72,50 @@ async def test_recurring_endpoint_returns_streams(client, headers, db_session):
     assert "inflow_streams" in body
 
 
+async def test_balances_endpoint_no_accounts(client, headers):
+    from decimal import Decimal
+
+    resp = await client.get("/api/plaid/balances", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert Decimal(body["assets"]) == Decimal("0")
+    assert Decimal(body["liabilities"]) == Decimal("0")
+    assert Decimal(body["net_worth"]) == Decimal("0")
+    assert body["accounts"] == []
+
+
+async def test_balances_aggregates_assets_and_liabilities(client, headers, db_session):
+    from unittest.mock import patch, AsyncMock
+
+    user_id = await get_user_id(db_session, "test@example.com")
+    db_session.add(
+        Account(
+            user_id=user_id,
+            plaid_access_token="access-fake",
+            plaid_item_id="item-fake",
+            institution_name="Chase",
+        )
+    )
+    await db_session.commit()
+
+    sample = [
+        {"name": "Checking", "type": "depository", "subtype": "checking", "mask": "0000",
+         "balances": {"current": 1500.50, "available": 1200, "iso_currency_code": "USD"}},
+        {"name": "Sapphire", "type": "credit", "subtype": "credit card", "mask": "1111",
+         "balances": {"current": 432.10, "available": None, "iso_currency_code": "USD"}},
+    ]
+    with patch("app.lib.plaid.get_accounts", AsyncMock(return_value=sample)):
+        resp = await client.get("/api/plaid/balances", headers=headers)
+
+    from decimal import Decimal
+    assert resp.status_code == 200
+    body = resp.json()
+    assert Decimal(body["assets"]) == Decimal("1500.50")
+    assert Decimal(body["liabilities"]) == Decimal("432.10")
+    assert Decimal(body["net_worth"]) == Decimal("1068.40")
+    assert len(body["accounts"]) == 2
+
+
 async def test_plaid_routes_require_auth(client):
     resp = await client.post("/api/plaid/link-token")
     assert resp.status_code == 403

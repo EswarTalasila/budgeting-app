@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.lib.rate_limit import limiter
-from app.routes import auth, transactions, budgets, plaid
+from app.routes import auth, transactions, budgets, plaid, goals
 
 
 DEV_ORIGINS = [
@@ -44,3 +44,4 @@ app.include_router(auth.router, prefix="/api/auth")
 app.include_router(transactions.router, prefix="/api/transactions")
 app.include_router(budgets.router, prefix="/api/budgets")
 app.include_router(plaid.router, prefix="/api/plaid")
+app.include_router(goals.router, prefix="/api/goals")

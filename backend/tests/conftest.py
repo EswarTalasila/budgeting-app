@@ -41,7 +41,7 @@ async def setup_db():
 @pytest_asyncio.fixture(autouse=True)
 async def clean_tables():
     async with test_engine.begin() as conn:
-        await conn.execute(text("TRUNCATE TABLE budgets, transactions, accounts, users CASCADE"))
+        await conn.execute(text("TRUNCATE TABLE goals, budgets, transactions, accounts, users CASCADE"))
     yield
 
 
@@ -67,7 +67,8 @@ def mock_external_services():
          patch("app.lib.plaid.create_link_token", AsyncMock(return_value="link-sandbox-fake")), \
          patch("app.lib.plaid.exchange_public_token", AsyncMock(return_value=("access-fake", "item-fake"))), \
          patch("app.lib.plaid.sync_transactions", AsyncMock(return_value=sample_sync)), \
-         patch("app.lib.plaid.get_recurring", AsyncMock(return_value={"outflow_streams": [], "inflow_streams": []})):
+         patch("app.lib.plaid.get_recurring", AsyncMock(return_value={"outflow_streams": [], "inflow_streams": []})), \
+         patch("app.lib.plaid.get_accounts", AsyncMock(return_value=[])):
         yield
 
 

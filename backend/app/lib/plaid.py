@@ -57,6 +57,12 @@ async def get_account_ids(access_token: str) -> list[str]:
     return [a["account_id"] for a in response["accounts"]]
 
 
+async def get_accounts(access_token: str) -> list[dict]:
+    request = AccountsGetRequest(access_token=access_token)
+    response = client.accounts_get(request)
+    return [a.to_dict() for a in response["accounts"]]
+
+
 async def get_recurring(access_token: str) -> dict:
     account_ids = await get_account_ids(access_token)
     payload = {

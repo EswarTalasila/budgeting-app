@@ -9,6 +9,9 @@ import {
 } from '../lib/api';
 import CategoryDonut from '../components/CategoryDonut';
 import MonthlyTrend from '../components/MonthlyTrend';
+import NetWorth from '../components/NetWorth';
+import BudgetAlerts from '../components/BudgetAlerts';
+import TopMerchants from '../components/TopMerchants';
 import Toast from '../components/Toast';
 
 function currentMonth() {
@@ -270,6 +273,10 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {!viewingPast && <NetWorth />}
+
+      <BudgetAlerts summary={summary} />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <Stat label="Budgeted" value={fmt(totalLimit)} />
         <Stat label="Spent" value={fmt(totalSpent)} />
@@ -281,15 +288,20 @@ export default function Dashboard() {
       </div>
 
       {!loading && summary.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-10">
-          <CategoryDonut items={summary} />
-          <MonthlyTrend
-            points={trend}
-            selectedMonth={selectedMonth}
-            currentMonth={todayMonth}
-            onSelectMonth={setSelectedMonth}
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+            <CategoryDonut items={summary} />
+            <MonthlyTrend
+              points={trend}
+              selectedMonth={selectedMonth}
+              currentMonth={todayMonth}
+              onSelectMonth={setSelectedMonth}
+            />
+          </div>
+          <div className="mb-10">
+            <TopMerchants month={selectedMonth} />
+          </div>
+        </>
       )}
 
       <div className="mb-3 flex items-baseline justify-between">

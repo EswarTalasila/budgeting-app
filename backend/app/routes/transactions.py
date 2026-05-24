@@ -2,12 +2,12 @@ import uuid
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func, case
 from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import Transaction
-from app.schemas import TransactionCreate, TransactionUpdate, TransactionOut
+from app.schemas import TransactionCreate, TransactionUpdate, TransactionOut, TopMerchant
 from app.lib.claude import categorize_transaction
 
 
@@ -112,6 +112,48 @@ async def update_transaction(
     await db.commit()
     await db.refresh(tx, attribute_names=["account"])
     return to_out(tx)
+
+
+@router.get("/top-merchants", response_model=list[TopMerchant])
+async def top_merchants(
+    month: str | None = None,
+    limit: int = 5,
+    db: AsyncSession = Depends(get_db),
+    user_id: uuid.UUID = Depends(get_current_user),
+):
+    if limit < 1 or limit > 50:
+        raise HTTPException(status_code=400, detail="limit must be between 1 and 50")
+
+    merchant_expr = func.coalesce(Transaction.merchant_name, Transaction.description).label("merchant")
+
+    query = (
+        select(
+            merchant_expr,
+            func.sum(Transaction.amount).label("spent"),
+            func.count(Transaction.id).label("transaction_count"),
+        )
+        .where(
+            Transaction.user_id == user_id,
+            Transaction.amount > 0,
+            Transaction.excluded.is_(False),
+            Transaction.category != "Income",
+        )
+        .group_by("merchant")
+        .order_by(func.sum(Transaction.amount).desc())
+        .limit(limit)
+    )
+
+    if month:
+        year, m = (int(p) for p in month.split("-"))
+        month_start = date(year, m, 1)
+        month_end = date(year + 1, 1, 1) if m == 12 else date(year, m + 1, 1)
+        query = query.where(Transaction.date >= month_start, Transaction.date < month_end)
+
+    result = await db.execute(query)
+    return [
+        TopMerchant(merchant=row[0] or "Unknown", spent=row[1], transaction_count=row[2])
+        for row in result.all()
+    ]
 
 
 @router.post("/recategorize")

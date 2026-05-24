@@ -9,6 +9,7 @@ function Icon({ name, className = 'w-[15px] h-[15px]' }) {
     transactions: <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />,
     budgets: <path d="M3 3v18h18M7 14l4-4 4 4 5-5" />,
     subscriptions: <path d="M4 4v6h6M20 20v-6h-6M20 4l-7 7M4 20l7-7" />,
+    goals: <path d="M12 2l2 4 4 .5-3 3 1 4-4-2-4 2 1-4-3-3 4-.5L12 2z" />,
     accounts: <path d="M3 10h18M5 6h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2zm10 8h2" />,
     settings: (
       <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -40,6 +41,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: 'dashboard', end: true },
   { to: '/transactions', label: 'Transactions', icon: 'transactions' },
   { to: '/budgets', label: 'Budgets', icon: 'budgets' },
+  { to: '/goals', label: 'Goals', icon: 'goals' },
   { to: '/subscriptions', label: 'Subscriptions', icon: 'subscriptions' },
   { to: '/accounts', label: 'Accounts', icon: 'accounts' },
 ];
