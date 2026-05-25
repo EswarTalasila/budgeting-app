@@ -70,8 +70,8 @@ export default function Settings() {
       setPwdErr("New passwords don't match.");
       return;
     }
-    if (pwd.next.length < 6) {
-      setPwdErr('New password must be at least 6 characters.');
+    if (pwd.next.length < 8) {
+      setPwdErr('New password must be at least 8 characters.');
       return;
     }
     setPwdSaving(true);
@@ -132,7 +132,7 @@ export default function Settings() {
         <ThemeToggle />
       </Section>
 
-      <Section title="Change password" description="Use at least 6 characters.">
+      <Section title="Change password" description="Use at least 8 characters.">
         <form onSubmit={handleChangePassword} className="space-y-3 max-w-md">
           <div>
             <label className="label">Current password</label>
@@ -149,7 +149,7 @@ export default function Settings() {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={pwd.next}
               onChange={(e) => setPwd((p) => ({ ...p, next: e.target.value }))}
               className="input"
@@ -160,7 +160,7 @@ export default function Settings() {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={pwd.confirm}
               onChange={(e) => setPwd((p) => ({ ...p, confirm: e.target.value }))}
               className="input"

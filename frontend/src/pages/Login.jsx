@@ -139,7 +139,7 @@ export default function Login() {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input"
@@ -148,7 +148,7 @@ export default function Login() {
             />
             {mode === 'register' && (
               <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">
-                At least 6 characters.
+                At least 8 characters.
               </p>
             )}
           </div>
@@ -159,7 +159,7 @@ export default function Login() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="input"

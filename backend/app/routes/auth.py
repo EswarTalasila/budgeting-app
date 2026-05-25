@@ -74,8 +74,10 @@ async def change_password(
     user = result.scalar_one_or_none()
     if not user or not verify_password(body.current_password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
-    if len(body.new_password) < 6:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password must be at least 6 characters")
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password must be at least 8 characters")
+    if len(body.new_password) > 128:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password is too long")
     user.hashed_password = hash_password(body.new_password)
     await db.commit()
 
